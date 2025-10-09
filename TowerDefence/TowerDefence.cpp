@@ -6,37 +6,59 @@ using namespace std;
 
 bool gameOver = false;
 const int width = 25;
-const int height = 30;
+const int height = 25;
 
 // Path coordinates
 int pathX[100], pathY[100];
 int pathLength = 0;
+bool pathMove;
 
 void createPath() {
 	int currentCol = 10; // Where path will start 
 	int currentPath = 0;
+
+	int previousCol = currentCol;
+
 	// Loop throuugh rows
-	for (int i = 0; i < height; i++) {
+	for (int currentRow = 0; currentRow < height; currentRow++) {
 		pathX[currentPath] = currentCol; // Set X to current col position
-		pathY[currentPath] = i; // Set Y to current row
+		pathY[currentPath] = currentRow; // Set Y to current row
 		currentPath++; // Increment array index
 
 		// Move left or right
-		if (i == 5) {
-			currentCol += 3; // Move 3right
+		if (currentRow == 5) {
+			currentCol += 3; // Move 3 right
 		}
 
-		if (i == 12) {
+		if (currentRow == 12) {
 			currentCol -= 7;
 		}
 
-		if (i == 17) {
+		if (currentRow == 15) {
+			currentCol += 5;
+		}
+
+		if (currentRow == 17) {
 			currentCol -= 4;
 		}
 
-		if (i == 20) {
+		if (currentRow == 20) {
 			currentCol += 10;
 		}
+
+		// If col moves
+		if (previousCol != currentCol) {
+			int colDiff = abs(currentCol - previousCol);
+			// Set direction to move
+			int dir = (currentCol > previousCol) ? 1 : -1;
+
+			for (int i = 1; i <= colDiff; i++) {
+				pathX[currentPath] = previousCol + (i * dir);
+				pathY[currentPath] = currentRow;
+				currentPath++;
+			}
+		}
+		previousCol = currentCol; // Update previousCol for if col moves again
 	}
 	pathLength = currentPath; //Stop path when it reaches end
 }
@@ -69,7 +91,7 @@ void Draw() {
 					break;
 				}
 			}
-			if (Path) cout << 'p'; // print on path position
+			if (Path) cout << '+'; // print on path position
 			// Else empty space
 			else {
 				cout << ' ';
