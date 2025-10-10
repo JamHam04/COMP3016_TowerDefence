@@ -13,6 +13,40 @@ int pathX[100], pathY[100];
 int pathLength = 0;
 bool pathMove;
 
+// Classes
+class Enemy {
+private:
+	int health;
+	int pathPosition;
+
+public:
+	// Enemy Stats
+	int x, y; //Coordinates
+
+	Enemy(int h) {
+		health = h;
+		pathPosition = 0;
+		x = pathX[0];
+		y = pathY[0];
+	}
+	
+	// Enemy Spawn
+
+	// Ememy Move
+
+	void move() {
+		x = pathX[pathPosition];
+		y = pathY[pathPosition];
+		pathPosition++; // Move 1
+	}
+	// Enemy Attack
+
+	// Enemy Damaged
+
+};
+
+Enemy smallEnemy(10);
+
 void createPath() {
 	int currentCol = 10; // Where path will start 
 	int currentPath = 0;
@@ -91,7 +125,11 @@ void Draw() {
 					break;
 				}
 			}
-			if (Path) cout << '+'; // print on path position
+			if (smallEnemy.x == j && smallEnemy.y == i)
+			{
+				cout << '0';
+			}
+			else if (Path) cout << '+'; // print on path position
 			// Else empty space
 			else {
 				cout << ' ';
@@ -111,6 +149,7 @@ void Draw() {
 
 	// Draw Towers
 
+
 	// Draw Enemies
 }
 
@@ -121,14 +160,20 @@ void Input() {
 
 }
 
+
+
 void Logic() {
-	// Tower attacks
+	
 
 	// Spawn enemies
-	
+	smallEnemy.move();
+
+
 	// Enemies move
 
 	// Enemy waves
+
+	// Tower attacks
 
 
 }
