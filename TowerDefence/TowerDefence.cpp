@@ -18,8 +18,8 @@ int pathLength = 0;
 bool pathMove;
 
 // Input
-enum Direction { STOP = 0, LEFT, RIGHT, UP, DOWN };
-Direction dir;
+enum Direction { UP, RIGHT, DOWN, LEFT };
+Direction cursorDir;
 int cursorX, cursorY;
 
 // Classes
@@ -80,6 +80,20 @@ Enemy smallEnemy(10, 5);
 
 vector<Enemy> enemies; // Store Enemy instances
 int spawnTick = 0;
+
+class Tower {
+private:
+	int towerPositionX, towerPositionY;
+	int towerRotation;
+	int towerDamage;
+	int projectileSpeed;
+
+public:
+	Tower(int d, int s) {
+		towerDamage = d;
+		projectileSpeed = s;
+	}
+};
 
 void createPath() {
 	int currentCol = 10; // Where path will start 
@@ -175,7 +189,22 @@ void Draw() {
 				if (path)
 					cout << '!';
 				else
-					cout << 'X';
+					switch (cursorDir) {
+					case UP:
+						cout << '^';
+						break;
+					case RIGHT:
+						cout << '>';
+						break;
+					case DOWN:
+						cout << 'v';
+						break;
+					case LEFT:
+						cout << '<';
+						break;
+					}
+
+
 			else if (enemySpawn) cout << '0';
 			else if (path) cout << '+'; // print on path position
 			// Else empty space
@@ -231,6 +260,14 @@ void Input() {
 		case 'y':
 			waveStart = true;
 			break;
+		case 'e':
+			// Rotate right
+			cursorDir = static_cast<Direction>((cursorDir + 1) % 4);
+			break;
+		case 'q':
+			// Rotate left
+			cursorDir = static_cast<Direction>((cursorDir + 3) % 4); 
+			break;
 		}
 	}
 
@@ -281,6 +318,7 @@ void Logic() {
 	}
 
 	// Enemy waves
+
 
     // Movement logic
 
