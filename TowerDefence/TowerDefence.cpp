@@ -1,6 +1,7 @@
 #include <iostream>
 #include <windows.h>
 #include <conio.h>
+#include <vector>
 
 using namespace std;
 
@@ -18,34 +19,48 @@ class Enemy {
 private:
 	int health;
 	int pathPosition;
+	int speed;
+	int moveTick;
 
 public:
 	// Enemy Stats
 	int x, y; //Coordinates
 
-	Enemy(int h) {
+	Enemy(int h, int s) {
 		health = h;
 		pathPosition = 0;
 		x = pathX[0];
 		y = pathY[0];
+		speed = s;
+		moveTick = 0;
 	}
-	
-	// Enemy Spawn
 
 	// Ememy Move
 
 	void move() {
-		x = pathX[pathPosition];
-		y = pathY[pathPosition];
-		pathPosition++; // Move 1
+		
+		// If at end
+		// Decrease player health, remove enemy?
+		if (moveTick != speed) {
+			moveTick++;
+		}
+		else {
+			x = pathX[pathPosition];
+			y = pathY[pathPosition];
+			pathPosition++; // Move 1
+			moveTick = 0;
+		}
 	}
-	// Enemy Attack
 
 	// Enemy Damaged
 
+	
 };
 
-Enemy smallEnemy(10);
+Enemy smallEnemy(10, 5);
+
+vector<Enemy> enemies; // Store Enemy instances
+int spawnTick = 0;
 
 void createPath() {
 	int currentCol = 10; // Where path will start 
@@ -125,10 +140,18 @@ void Draw() {
 					break;
 				}
 			}
-			if (smallEnemy.x == j && smallEnemy.y == i)
-			{
-				cout << '0';
+
+			// Draw enemies
+			bool enemySpawn = false;
+			
+			for (int enemy = 0; enemy < enemies.size(); enemy++) {
+				if (enemies[enemy].x == j && enemies[enemy].y == i)
+				{
+					enemySpawn = true;
+					break;
+				}
 			}
+			if (enemySpawn) cout << '0';
 			else if (Path) cout << '+'; // print on path position
 			// Else empty space
 			else {
@@ -151,6 +174,9 @@ void Draw() {
 
 
 	// Draw Enemies
+
+	// Print Player Health
+	// Print Wave Number
 }
 
 void Input() {
@@ -162,14 +188,22 @@ void Input() {
 
 
 
+
 void Logic() {
 	
 
 	// Spawn enemies
-	smallEnemy.move();
 
+	spawnTick++; // Spawn delay
+	if (spawnTick >= 10) {
+		enemies.emplace_back(10, 4); // Create new Enemy in vector
+		spawnTick = 0;
+	}
 
-	// Enemies move
+	// Move enemies
+	for (int i = 0; i < enemies.size(); ++i) {
+		enemies[i].move(); // Loop through vector and move each`
+	}
 
 	// Enemy waves
 
@@ -183,8 +217,8 @@ int main() {
 
 	while (!gameOver) {
 		Draw(); //Draw map
-		Input();
-		Logic();
+		Input(); // Player Inputs
+		Logic(); // Game Logic
 		Sleep(100); //Pause loop so that it doesn't run 1000s of times a second
 	}
 }
