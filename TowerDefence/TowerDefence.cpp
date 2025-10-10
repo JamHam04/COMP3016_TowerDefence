@@ -6,13 +6,21 @@
 using namespace std;
 
 bool gameOver = false;
+bool waveStart = false; // Wait for input to start wave (waveStart = true during waves)
 const int width = 25;
 const int height = 25;
+int baseHealth = 10;
+int money;
 
 // Path coordinates
 int pathX[100], pathY[100];
 int pathLength = 0;
 bool pathMove;
+
+// Input
+enum Direction { STOP = 0, LEFT, RIGHT, UP, DOWN };
+Direction dir;
+int cursorX, cursorY;
 
 // Classes
 class Enemy {
@@ -23,8 +31,10 @@ private:
 	int moveTick;
 
 public:
+	int getPathPosition() const {return pathPosition;}
 	// Enemy Stats
 	int x, y; //Coordinates
+
 
 	Enemy(int h, int s) {
 		health = h;
@@ -53,7 +63,16 @@ public:
 	}
 
 	// Enemy Damaged
+	void hit(int damage) {
+		// Take damage
+		health -= damage;
 
+		if (health <= 0) {
+			// Enemy die (erase from vector somehow here?) 
+			
+			
+		}
+	}
 	
 };
 
@@ -120,6 +139,7 @@ void Setup() {
 void Draw() {
 	// Draw Map
 	system("cls");
+
 	// Draw top border
 	for (int i = 0; i < width + 2; i++) { //Print one row along the top width (+2 for corners)
 		cout << '#';
@@ -132,11 +152,11 @@ void Draw() {
 			if (j == 0) cout << '#'; // Print left border
 
 			// Draw path
-			bool Path = false;
+			bool path = false;
 			// Loop through map
 			for (int k = 0; k < pathLength; k++) {
 				if (pathX[k] == j && pathY[k] == i) { // If position is a path
-					Path = true; // Set position as path
+					path = true; // Set position as path
 					break;
 				}
 			}
@@ -151,9 +171,15 @@ void Draw() {
 					break;
 				}
 			}
-			if (enemySpawn) cout << '0';
-			else if (Path) cout << '+'; // print on path position
+			if (i == cursorY && j == cursorX)
+				if (path)
+					cout << '!';
+				else
+					cout << 'X';
+			else if (enemySpawn) cout << '0';
+			else if (path) cout << '+'; // print on path position
 			// Else empty space
+			
 			else {
 				cout << ' ';
 			}
@@ -175,13 +201,44 @@ void Draw() {
 
 	// Draw Enemies
 
-	// Print Player Health
+	// Controls 
+	cout << "1 - Tower 1 [Price - 50]" << endl;
+	cout << "2 - Tower 2 [Price - 200]" << endl;
+	cout << "3 - Tower 3 [Price - 500]" << endl;
+	// Print Stats
+	cout << endl << "Base Health: " << baseHealth << endl;
+	cout << "Money: " << money;
 	// Print Wave Number
 }
 
+
 void Input() {
 	// Place Tower
+	if (_kbhit()) {
+		switch (_getch()) {
+		case 'a':
+			cursorX--;
+			break;
+		case 'd':
+			cursorX++;
+			break;
+		case 'w':
+			cursorY--;
+			break;
+		case 's':
+			cursorY++;
+			break;
+		case 'y':
+			waveStart = true;
+			break;
+		}
+	}
 
+	// Wave Start
+	
+	if (!waveStart) {
+		cout << endl << "Press Y to start wave";
+	}
 	// Upgrade Tower
 
 }
@@ -194,18 +251,39 @@ void Logic() {
 
 	// Spawn enemies
 
-	spawnTick++; // Spawn delay
-	if (spawnTick >= 10) {
-		enemies.emplace_back(10, 4); // Create new Enemy in vector
-		spawnTick = 0;
+	if (waveStart) {
+		spawnTick++; // Spawn delay
+		if (spawnTick >= 10) {
+			enemies.emplace_back(10, 1); // Create new Enemy in vector
+			spawnTick = 0;
+		}
 	}
 
 	// Move enemies
 	for (int i = 0; i < enemies.size(); ++i) {
-		enemies[i].move(); // Loop through vector and move each`
+		enemies[i].move(); // Loop through vector and move each
+
+		if (enemies[i].getPathPosition() >= pathLength) {
+			// Decrease player health
+			baseHealth--;
+
+			// Delete enemy
+			enemies.erase(enemies.begin() + i); // Delete from vector
+
+			
+		}
+	}
+
+	// Game Over
+	if (baseHealth <= 0) {
+		gameOver = true;
+		cout << "GAME OVER";
 	}
 
 	// Enemy waves
+
+    // Movement logic
+
 
 	// Tower attacks
 
