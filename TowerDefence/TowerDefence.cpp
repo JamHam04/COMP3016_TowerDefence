@@ -10,7 +10,7 @@ bool waveStart = false; // Wait for input to start wave (waveStart = true during
 const int width = 25;
 const int height = 25;
 int baseHealth = 10;
-int money;
+int money = 100;
 
 // Path coordinates
 int pathX[100], pathY[100];
@@ -84,16 +84,29 @@ int spawnTick = 0;
 class Tower {
 private:
 	int towerPositionX, towerPositionY;
-	int towerRotation;
+	Direction towerRotation;
 	int towerDamage;
 	int projectileSpeed;
 
 public:
-	Tower(int d, int s) {
+
+
+
+	Tower(int d, int s, Direction dir) {
 		towerDamage = d;
 		projectileSpeed = s;
+		towerPositionX = cursorX;
+		towerPositionY = cursorY;
+		towerRotation = dir;
 	}
+
+	int getTowerX() const { return towerPositionX; }
+	int getTowerY() const { return towerPositionY; }
+	Direction getRotation() const { return towerRotation; }
 };
+
+vector<Tower> towers; // Store Tower instances
+
 
 void createPath() {
 	int currentCol = 10; // Where path will start 
@@ -185,7 +198,31 @@ void Draw() {
 					break;
 				}
 			}
-			if (i == cursorY && j == cursorX)
+
+			// Draw Tower
+			bool towerHere = false;
+			for (int t = 0; t < towers.size(); t++) {
+				if (towers[t].getTowerX() == j && towers[t].getTowerY() == i) {
+					switch (towers[t].getRotation()) {
+					case UP:
+						cout << 'A';
+						break;
+					case RIGHT:
+						cout << '>';
+						break;
+					case DOWN:
+						cout << 'V';
+						break;
+					case LEFT:
+						cout << '<';
+						break;
+					}
+					towerHere = true;
+					break;
+				}
+			}
+			if (towerHere) continue;
+			else if (i == cursorY && j == cursorX)
 				if (path)
 					cout << '!';
 				else
@@ -268,6 +305,19 @@ void Input() {
 			// Rotate left
 			cursorDir = static_cast<Direction>((cursorDir + 3) % 4); 
 			break;
+		case '1':
+			// Place Tower 1
+			if (money >= 50) {
+				towers.emplace_back(10, 2, cursorDir); 
+				money -= 50;
+			}
+			break;
+		case '2':
+			waveStart = true;
+			break;
+		case '3':
+			waveStart = true;
+			break;
 		}
 	}
 
@@ -335,6 +385,6 @@ int main() {
 		Draw(); //Draw map
 		Input(); // Player Inputs
 		Logic(); // Game Logic
-		Sleep(100); //Pause loop so that it doesn't run 1000s of times a second
+		Sleep(100); //Pause loop 
 	}
 }
