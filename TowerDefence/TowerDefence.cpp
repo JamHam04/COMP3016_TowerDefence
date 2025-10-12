@@ -86,26 +86,70 @@ private:
 	int towerPositionX, towerPositionY;
 	Direction towerRotation;
 	int towerDamage;
-	int projectileSpeed;
+	int towerRange;
 
 public:
 
 
 
-	Tower(int d, int s, Direction dir) {
+	Tower(int d, int r, Direction dir) {
 		towerDamage = d;
-		projectileSpeed = s;
 		towerPositionX = cursorX;
 		towerPositionY = cursorY;
 		towerRotation = dir;
+		towerRange = r;
 	}
 
 	int getTowerX() const { return towerPositionX; }
 	int getTowerY() const { return towerPositionY; }
 	Direction getRotation() const { return towerRotation; }
+	int getRange() const { return towerRange; }
+	int getDamage() const { return towerDamage; }
 };
 
 vector<Tower> towers; // Store Tower instances
+
+class Projectile {
+	private:
+	int projX, projY;
+	Direction direction;
+	int speed;
+	int damage;
+	int moveTick;
+
+	public:
+		Projectile(int x, int y, Direction dir, int s, int d) {
+			projX = x;
+			projY = y;
+			direction = dir;
+			speed = s;
+			damage = d;
+			moveTick = 0;
+		}
+
+		void move() {
+
+
+			
+			if (moveTick != speed) {
+				moveTick++;
+			}
+			else {
+				moveTick = 0;
+				switch (direction) {
+				case UP:    projX--; break;
+				case RIGHT: projX++; break;
+				case DOWN:  projX++; break;
+				case LEFT:  projY--; break;
+				}
+			}
+			// Prevent going out map
+		}
+
+};
+
+vector<Projectile> projectiles; // Store Projectile instances
+
 
 
 void createPath() {
@@ -370,10 +414,43 @@ void Logic() {
 	// Enemy waves
 
 
-    // Movement logic
-
 
 	// Tower attacks
+	for (int t = 0; t < towers.size(); t++) { // Loop through towers
+		// Get tower stats
+		int towerX = towers[t].getTowerX();
+		int towerY = towers[t].getTowerY();
+		Direction dir = towers[t].getRotation();
+		int range = towers[t].getRange();
+		int damage = towers[t].getDamage();
+		// Check for enemies in range
+		for (int e = 0; e < enemies.size(); e++) { // Loop throguh enemies
+			// Get enemy position
+			int enemyX = enemies[e].x;
+			int enemyY = enemies[e].y;
+			bool inRange = false;
+			switch (dir) {
+			// Check direction and range
+			case UP:
+				if (enemyX == towerX && enemyY < towerY && enemyY >= towerY - range) inRange = true;
+				break;
+			case RIGHT:
+				if (enemyY == towerY && enemyX > towerX && enemyX <= towerX + range) inRange = true;
+				break;
+			case DOWN:
+				if (enemyX == towerX && enemyY > towerY && enemyY <= towerY + range) inRange = true;
+				break;
+			case LEFT:
+				if (enemyY == towerY && enemyX < towerX && enemyX >= towerX - range) inRange = true;
+				break;
+			}
+			// If enemy in range
+			if (inRange) {
+				enemies[e].hit(damage); // Deal damage
+				break; 
+			}
+		}
+	}
 
 
 }
