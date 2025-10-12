@@ -32,6 +32,7 @@ private:
 
 public:
 	int getPathPosition() const {return pathPosition;}
+	int getHealth() const { return health; }
 	// Enemy Stats
 	int x, y; //Coordinates
 
@@ -76,7 +77,7 @@ public:
 	
 };
 
-Enemy smallEnemy(10, 5);
+Enemy smallEnemy(1, 5);
 
 vector<Enemy> enemies; // Store Enemy instances
 int spawnTick = 0;
@@ -131,21 +132,24 @@ class Projectile {
 
 
 			
-			if (moveTick != speed) {
-				moveTick++;
+			//if (moveTick != speed) {
+			//	moveTick++;
+			//}
+			//else {
+			moveTick = 0;
+			switch (direction) {
+			case UP:    projY--; break;
+			case RIGHT: projX++; break;
+			case DOWN:  projY++; break;
+			case LEFT:  projX--; break;
 			}
-			else {
-				moveTick = 0;
-				switch (direction) {
-				case UP:    projX--; break;
-				case RIGHT: projX++; break;
-				case DOWN:  projX++; break;
-				case LEFT:  projY--; break;
-				}
-			}
+			//}
 			// Prevent going out map
 		}
 
+		int getProjX() const { return projX; }
+		int getProjY() const { return projY; }
+		int getDamage() const { return damage; }
 };
 
 vector<Projectile> projectiles; // Store Projectile instances
@@ -265,7 +269,19 @@ void Draw() {
 					break;
 				}
 			}
+
+			// Draw protectiles
+			bool projectileHere = false;
+			for (int p = 0; p < projectiles.size(); p++) {
+				if (projectiles[p].getProjX() == j && projectiles[p].getProjY() == i) {
+					cout << 'B';
+					projectileHere = true;
+					break;
+				}
+			}
+			
 			if (towerHere) continue;
+			if (projectileHere) continue;
 			else if (i == cursorY && j == cursorX)
 				if (path)
 					cout << '!';
@@ -306,15 +322,14 @@ void Draw() {
 	}
 	cout << endl;
 
-	// Draw Towers
-
 
 	// Draw Enemies
 
 	// Controls 
-	cout << "1 - Tower 1 [Price - 50]" << endl;
-	cout << "2 - Tower 2 [Price - 200]" << endl;
-	cout << "3 - Tower 3 [Price - 500]" << endl;
+	cout << "1 - Tower 1 [Price - 50]" << endl; // Shoots in straight line 
+	cout << "2 - Tower 2 [Price - 200]" << endl; // Shoots in 4 directions
+	cout << "3 - Tower 3 [Price - 500]" << endl; // Shoorts in radius
+	// Upgrade ideas - increase damage, range, fire rate, multi shot, pierce, slow
 	// Print Stats
 	cout << endl << "Base Health: " << baseHealth << endl;
 	cout << "Money: " << money;
@@ -352,7 +367,7 @@ void Input() {
 		case '1':
 			// Place Tower 1
 			if (money >= 50) {
-				towers.emplace_back(10, 2, cursorDir); 
+				towers.emplace_back(1, 2, cursorDir); // Tower damage, range, direction
 				money -= 50;
 			}
 			break;
@@ -385,7 +400,7 @@ void Logic() {
 	if (waveStart) {
 		spawnTick++; // Spawn delay
 		if (spawnTick >= 10) {
-			enemies.emplace_back(10, 1); // Create new Enemy in vector
+			enemies.emplace_back(5, 1); // Create new Enemy in vector
 			spawnTick = 0;
 		}
 	}
@@ -400,15 +415,23 @@ void Logic() {
 
 			// Delete enemy
 			enemies.erase(enemies.begin() + i); // Delete from vector
-
+			continue;
 			
+		}
+
+		// If enemy dead
+		if (enemies[i].getHealth() <= 0) {
+			money += 10; // Give money for kill
+			// Delete enemy
+			enemies.erase(enemies.begin() + i); // Delete from vector
+			continue;
 		}
 	}
 
 	// Game Over
 	if (baseHealth <= 0) {
 		gameOver = true;
-		cout << "GAME OVER";
+		cout << endl <<"GAME OVER";
 	}
 
 	// Enemy waves
@@ -446,11 +469,33 @@ void Logic() {
 			}
 			// If enemy in range
 			if (inRange) {
-				enemies[e].hit(damage); // Deal damage
+				projectiles.emplace_back(towerX, towerY, dir, 1, damage);
 				break; 
 			}
 		}
 	}
+
+	// Move projectiles
+	for (int p = 0; p < projectiles.size(); p++) {
+		projectiles[p].move();
+		// Get projectile stats
+		int projX = projectiles[p].getProjX();
+		int projY = projectiles[p].getProjY();
+		int damage = projectiles[p].getDamage();
+		// Check if hit an enemy
+		for (int e = 0; e < enemies.size(); e++) {
+			if (projX == enemies[e].x && projY == enemies[e].y) {
+				// When enemy hit
+				enemies[e].hit(damage); // Apply damage to enemy
+				projectiles.erase(projectiles.begin() + p); // Remove projectile
+				break;
+			}
+		}
+	}
+
+	// Delete Tower
+	// Remove from vector
+	// Refund cost
 
 
 }
