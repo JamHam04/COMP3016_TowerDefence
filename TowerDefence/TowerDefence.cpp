@@ -2,160 +2,19 @@
 #include <windows.h>
 #include <conio.h>
 #include <vector>
+#include "Game.h"
 
 using namespace std;
 
-bool gameOver = false;
-bool waveStart = false; // Wait for input to start wave (waveStart = true during waves)
-const int width = 25;
-const int height = 25;
-int baseHealth = 10;
-int money = 100;
 
-// Path coordinates
-int pathX[100], pathY[100];
-int pathLength = 0;
-bool pathMove;
-
-// Input
-enum Direction { UP, RIGHT, DOWN, LEFT };
-Direction cursorDir;
-int cursorX, cursorY;
-
-// Classes
-class Enemy {
-private:
-	int health;
-	int pathPosition;
-	int speed;
-	int moveTick;
-
-public:
-	int getPathPosition() const {return pathPosition;}
-	int getHealth() const { return health; }
-	// Enemy Stats
-	int x, y; //Coordinates
-
-
-	Enemy(int h, int s) {
-		health = h;
-		pathPosition = 0;
-		x = pathX[0];
-		y = pathY[0];
-		speed = s;
-		moveTick = 0;
-	}
-
-	// Ememy Move
-
-	void move() {
-		
-		// If at end
-		// Decrease player health, remove enemy?
-		if (moveTick != speed) {
-			moveTick++;
-		}
-		else {
-			x = pathX[pathPosition];
-			y = pathY[pathPosition];
-			pathPosition++; // Move 1
-			moveTick = 0;
-		}
-	}
-
-	// Enemy Damaged
-	void hit(int damage) {
-		// Take damage
-		health -= damage;
-
-		if (health <= 0) {
-			// Enemy die (erase from vector somehow here?) 
-			
-			
-		}
-	}
-	
-};
-
-Enemy smallEnemy(1, 5);
-
-vector<Enemy> enemies; // Store Enemy instances
-int spawnTick = 0;
-
-class Tower {
-private:
-	int towerPositionX, towerPositionY;
-	Direction towerRotation;
-	int towerDamage;
-	int towerRange;
-
-public:
 
 
 
-	Tower(int d, int r, Direction dir) {
-		towerDamage = d;
-		towerPositionX = cursorX;
-		towerPositionY = cursorY;
-		towerRotation = dir;
-		towerRange = r;
-	}
-
-	int getTowerX() const { return towerPositionX; }
-	int getTowerY() const { return towerPositionY; }
-	Direction getRotation() const { return towerRotation; }
-	int getRange() const { return towerRange; }
-	int getDamage() const { return towerDamage; }
-};
-
-vector<Tower> towers; // Store Tower instances
-
-class Projectile {
-	private:
-	int projX, projY;
-	Direction direction;
-	int speed;
-	int damage;
-	int moveTick;
-	bool penetate; // Go through enemies
-
-	public:
-		Projectile(int x, int y, Direction dir, int s, int d) {
-			projX = x;
-			projY = y;
-			direction = dir;
-			speed = s;
-			damage = d;
-			moveTick = 0;
-			penetate = false;
-		}
-
-		void move() {
+// Classes
 
 
-			
-			if (moveTick != speed) {
-				moveTick++;
-			}
-			else {
-				moveTick = 0;
-				switch (direction) {
-				case UP:    projY--; break;
-				case RIGHT: projX++; break;
-				case DOWN:  projY++; break;
-				case LEFT:  projX--; break;
-				}
-			}
-			// Prevent going out map
-		}
+//Enemy smallEnemy(1, 5);
 
-		int getProjX() const { return projX; }
-		int getProjY() const { return projY; }
-		int getDamage() const { return damage; }
-		bool canPenetrate() const { return penetate; }
-};
-
-vector<Projectile> projectiles; // Store Projectile instances
 
 
 
@@ -519,6 +378,7 @@ void Logic() {
 }
 
 int main() {
+	Game game;
 	Setup();
 
 	while (!gameOver) {
