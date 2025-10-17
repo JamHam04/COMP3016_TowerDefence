@@ -10,7 +10,6 @@ using namespace std;
 
 
 
-// Classes
 
 
 //Enemy smallEnemy(1, 5);
@@ -18,7 +17,7 @@ using namespace std;
 
 
 
-void createPath() {
+void Game::createPath() {
 	int currentCol = 10; // Where path will start 
 	int currentPath = 0;
 
@@ -68,12 +67,12 @@ void createPath() {
 	pathLength = currentPath; //Stop path when it reaches end
 }
 
-void Setup() {
+void Game::Setup() {
 	// Set Variables
 	createPath();
 }
 
-void Draw() {
+void Game::Draw() {
 	// Draw Map
 	system("cls");
 
@@ -102,7 +101,7 @@ void Draw() {
 			bool enemySpawn = false;
 			
 			for (int enemy = 0; enemy < enemies.size(); enemy++) {
-				if (enemies[enemy].x == j && enemies[enemy].y == i)
+				if (enemies[enemy].getX() == j && enemies[enemy].getY() == i)
 				{
 					enemySpawn = true;
 					break;
@@ -199,7 +198,7 @@ void Draw() {
 }
 
 
-void Input() {
+void Game::Input() {
 	// Place Tower 
 	if (_kbhit()) {
 		switch (_getch()) {
@@ -229,7 +228,7 @@ void Input() {
 		case '1':
 			// Place Tower 1
 			if (money >= 50) {
-				towers.emplace_back(1, 2, cursorDir); // Tower damage, range, direction
+				towers.emplace_back(cursorX, cursorY, 1, 2, cursorDir); // Tower damage, range, direction
 				money -= 50;
 			}
 			break;
@@ -254,7 +253,7 @@ void Input() {
 
 
 
-void Logic() {
+void Game::Logic() {
 	
 
 	// Spawn enemies
@@ -269,7 +268,7 @@ void Logic() {
 
 	// Move enemies
 	for (int i = 0; i < enemies.size(); ++i) {
-		enemies[i].move(); // Loop through vector and move each
+		enemies[i].move(pathX, pathY, pathLength); // Loop through vector and move each
 
 		if (enemies[i].getPathPosition() >= pathLength) {
 			// Decrease player health
@@ -312,8 +311,8 @@ void Logic() {
 		// Check for enemies in range
 		for (int e = 0; e < enemies.size(); e++) { // Loop throguh enemies
 			// Get enemy position
-			int enemyX = enemies[e].x;
-			int enemyY = enemies[e].y;
+			int enemyX = enemies[e].getX();
+			int enemyY = enemies[e].getY();
 			bool inRange = false;
 			switch (dir) {
 			// Check direction and range
@@ -358,7 +357,7 @@ void Logic() {
 		int damage = projectiles[p].getDamage();
 		// Check if hit an enemy
 		for (int e = 0; e < enemies.size(); e++) {
-			if (projX == enemies[e].x && projY == enemies[e].y) {
+			if (projX == enemies[e].getX() && projY == enemies[e].getY()) {
 				// When enemy hit
 				enemies[e].hit(damage); // Apply damage to enemy
 				projectiles.erase(projectiles.begin() + p); // Remove projectile
@@ -379,12 +378,12 @@ void Logic() {
 
 int main() {
 	Game game;
-	Setup();
+	game.Setup();
 
-	while (!gameOver) {
-		Draw(); //Draw map
-		Input(); // Player Inputs
-		Logic(); // Game Logic
+	while (!game.getGameOver()) {
+		game.Draw(); //Draw map
+		game.Input(); // Player Inputs
+		game.Logic(); // Game Logic
 		Sleep(100); //Pause loop 
 	}
 }

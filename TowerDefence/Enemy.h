@@ -5,10 +5,10 @@ private:
 	int pathPosition;
 	int speed;
 	int moveTick;
-
+	int x, y; //Coordinates
 public:
 
-	int x, y; //Coordinates
+	
 
 
 	// Ememy Move
@@ -17,6 +17,8 @@ public:
 
 	// Enemy Damaged
 	void hit(int damage);
+	int getX() const { return x; }
+	int getY() const { return y; }
 	int getPathPosition() const { return pathPosition; }
 	int getHealth() const { return health; }
 	

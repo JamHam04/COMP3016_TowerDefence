@@ -7,6 +7,7 @@
 
 class Game
 {
+private:
 	// Game 
 	bool gameOver = false;
 	bool waveStart = false; // Wait for input to start wave (waveStart = true during waves)
@@ -15,6 +16,7 @@ class Game
 	int baseHealth = 10;
 	int money = 100;
 	int spawnTick = 0;
+	
 
 	// Path coordinates
 	int pathX[100], pathY[100];
@@ -23,11 +25,20 @@ class Game
 
 	// Input
 	int cursorX, cursorY;
+	Direction cursorDir;
 
 	// Enemy vectors
 	std::vector<Enemy> enemies; // Store Enemy instances
 	std::vector<Tower> towers; // Store Tower instances
 	std::vector<Projectile> projectiles; // Store Projectile instances
+public:
 
+	void Setup();
+	void Draw();
+	void Logic();
+	void Input();
+	void createPath();
+
+	bool getGameOver() const { return gameOver; }
 };
 
