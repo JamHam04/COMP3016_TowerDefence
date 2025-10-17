@@ -117,6 +117,7 @@ class Projectile {
 	int speed;
 	int damage;
 	int moveTick;
+	bool penetate; // Go through enemies
 
 	public:
 		Projectile(int x, int y, Direction dir, int s, int d) {
@@ -126,30 +127,32 @@ class Projectile {
 			speed = s;
 			damage = d;
 			moveTick = 0;
+			penetate = false;
 		}
 
 		void move() {
 
 
 			
-			//if (moveTick != speed) {
-			//	moveTick++;
-			//}
-			//else {
-			moveTick = 0;
-			switch (direction) {
-			case UP:    projY--; break;
-			case RIGHT: projX++; break;
-			case DOWN:  projY++; break;
-			case LEFT:  projX--; break;
+			if (moveTick != speed) {
+				moveTick++;
 			}
-			//}
+			else {
+				moveTick = 0;
+				switch (direction) {
+				case UP:    projY--; break;
+				case RIGHT: projX++; break;
+				case DOWN:  projY++; break;
+				case LEFT:  projX--; break;
+				}
+			}
 			// Prevent going out map
 		}
 
 		int getProjX() const { return projX; }
 		int getProjY() const { return projY; }
 		int getDamage() const { return damage; }
+		bool canPenetrate() const { return penetate; }
 };
 
 vector<Projectile> projectiles; // Store Projectile instances
@@ -338,7 +341,7 @@ void Draw() {
 
 
 void Input() {
-	// Place Tower
+	// Place Tower 
 	if (_kbhit()) {
 		switch (_getch()) {
 		case 'a':
@@ -400,7 +403,7 @@ void Logic() {
 	if (waveStart) {
 		spawnTick++; // Spawn delay
 		if (spawnTick >= 10) {
-			enemies.emplace_back(5, 1); // Create new Enemy in vector
+			enemies.emplace_back(10, 2); // Create new Enemy in vector (health, speed)
 			spawnTick = 0;
 		}
 	}
@@ -424,6 +427,7 @@ void Logic() {
 			money += 10; // Give money for kill
 			// Delete enemy
 			enemies.erase(enemies.begin() + i); // Delete from vector
+			
 			continue;
 		}
 	}
@@ -469,7 +473,18 @@ void Logic() {
 			}
 			// If enemy in range
 			if (inRange) {
-				projectiles.emplace_back(towerX, towerY, dir, 1, damage);
+				int projX = towerX;
+				int projY = towerY;
+
+				switch (dir) {
+				case UP:    projY--; break;
+				case RIGHT: projX++; break;
+				case DOWN:  projY++; break;
+				case LEFT:  projX--; break;
+				}
+
+				projectiles.emplace_back(projX, projY, dir, 1, damage);
+
 				break; 
 			}
 		}
@@ -488,6 +503,9 @@ void Logic() {
 				// When enemy hit
 				enemies[e].hit(damage); // Apply damage to enemy
 				projectiles.erase(projectiles.begin() + p); // Remove projectile
+				// BUG - Projectiles not being removed (projeciles timing step over enemies)
+				p--;
+					
 				break;
 			}
 		}
