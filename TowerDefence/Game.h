@@ -4,6 +4,8 @@
 #include "Projectile.h"
 #include "Direction.h"
 #include <vector>
+#include <SDL.h>
+
 
 class Game
 {
@@ -31,13 +33,23 @@ private:
 	std::vector<Enemy> enemies; // Store Enemy instances
 	std::vector<Tower> towers; // Store Tower instances
 	std::vector<Projectile> projectiles; // Store Projectile instances
-public:
 
+	// Render
+	SDL_Window* window;
+	SDL_Renderer* renderer;
+public:
+	// Render
+	Game();
+	~Game();
+
+
+	// Game functions
 	void Setup();
 	void Draw();
 	void Logic();
 	void Input();
 	void createPath();
+	void Render();
 
 	bool getGameOver() const { return gameOver; }
 };

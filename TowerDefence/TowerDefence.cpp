@@ -4,6 +4,9 @@
 #include <vector>
 #include "Game.h"
 
+#include <SDL.h>
+
+
 using namespace std;
 
 
@@ -197,8 +200,121 @@ void Game::Draw() {
 	// Print Wave Number
 }
 
+void Game::Render() {
+	// Drawn background
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
+
+	// Draw grid
+	SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255); 
+	for (int i = 0; i < height; i++) { // Rows
+		for (int j = 0; j < width; j++) { // Columns
+			SDL_Rect mapRect = { j * 24, i * 24, 24, 24 };
+			SDL_RenderDrawRect(renderer, &mapRect);
+		}
+	}
+
+	// Draw path
+	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); 
+	for (int i = 0; i < pathLength; i++) {
+		SDL_Rect pathTile = { pathX[i] * 24, pathY[i] * 24, 24, 24 };
+		SDL_RenderFillRect(renderer, &pathTile);
+	}
+
+	// Draw enemies
+	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+	for (int enemy = 0; enemy < enemies.size(); enemy++) {
+		SDL_Rect enemyRect = { enemies[enemy].getX() * 24, enemies[enemy].getY() * 24, 24, 24 };
+			SDL_RenderFillRect(renderer, &enemyRect);
+		
+	}
+	
+	SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+	// Draw Tower
+	bool towerHere = false;
+	for (int t = 0; t < towers.size(); t++) {
+		SDL_Rect towerRect = { towers[t].getTowerX() * 24, towers[t].getTowerY() * 24, 24, 24 };
+		SDL_RenderFillRect(renderer, &towerRect);
+			switch (towers[t].getRotation()) {
+			case UP:
+				
+				break;
+			case RIGHT:
+				
+				break;
+			case DOWN:
+				
+				break;
+			case LEFT:
+				
+				break;
+			}
+
+		SDL_RenderFillRect(renderer, &towerRect);
+	}
+
+	
+
+	// Draw cursor (box)
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	SDL_Rect cursorRect = { cursorX * 24, cursorY * 24, 24, 24 };
+	SDL_RenderDrawRect(renderer, &cursorRect);
+
+
+
+
+	SDL_RenderPresent(renderer);
+	SDL_Delay(50);
+};
+
 
 void Game::Input() {
+	SDL_Event event;
+	const Uint8* state = SDL_GetKeyboardState(NULL);
+	while (SDL_PollEvent(&event)) {
+		if (state[SDL_SCANCODE_X]) {
+			gameOver = true;
+		}
+	}
+
+	if (state[SDL_SCANCODE_A]) {
+		cursorX--;
+	}
+	if (state[SDL_SCANCODE_D]) {
+		cursorX++;
+	}
+	if (state[SDL_SCANCODE_W]) {
+		cursorY--;
+	}
+	if (state[SDL_SCANCODE_S]) {
+		cursorY++;
+	}
+	if (state[SDL_SCANCODE_Y]) {
+		waveStart = true;
+	}
+	if (state[SDL_SCANCODE_E]) {
+		// Rotate right
+		cursorDir = static_cast<Direction>((cursorDir + 1) % 4);
+
+	}
+	if (state[SDL_SCANCODE_Q]) {
+		// Rotate left
+		cursorDir = static_cast<Direction>((cursorDir + 3) % 4);
+	}
+	if (state[SDL_SCANCODE_1]) {
+		// Place Tower 1
+		if (money >= 50) {
+			towers.emplace_back(cursorX, cursorY, 1, 2, cursorDir); // Tower damage, range, direction
+			money -= 50;
+		}
+	}
+	if (state[SDL_SCANCODE_2]) {
+		// Place Tower 2
+	}
+	if (state[SDL_SCANCODE_3]) {
+		// Place Tower 3
+	}
+
 	// Place Tower 
 	if (_kbhit()) {
 		switch (_getch()) {
@@ -376,14 +492,34 @@ void Game::Logic() {
 
 }
 
-int main() {
+Game::Game() {
+	SDL_Init(SDL_INIT_VIDEO);
+
+
+	window = SDL_CreateWindow("Tower Defence", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width * 24, height * 24, SDL_WINDOW_SHOWN);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+}
+
+Game::~Game() {
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+};
+
+int main(int argc, char* argv[]) {
+
+	
+
 	Game game;
 	game.Setup();
 
 	while (!game.getGameOver()) {
-		game.Draw(); //Draw map
+		//game.Draw(); //Draw map
 		game.Input(); // Player Inputs
 		game.Logic(); // Game Logic
-		Sleep(100); //Pause loop 
+		game.Render(); // Render map
+		SDL_Delay(100); //Pause loop 
 	}
+
+	return 0;
 }
