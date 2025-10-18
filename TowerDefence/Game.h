@@ -18,6 +18,7 @@ private:
 	int baseHealth = 10;
 	int money = 100;
 	int spawnTick = 0;
+	int gridSize = 24;
 	
 
 	// Path coordinates

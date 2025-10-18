@@ -202,11 +202,12 @@ void Game::Render() {
 
 	// Draw random points?
 
+
 	// Draw grid
 	SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255); 
 	for (int i = 0; i < height; i++) { // Rows
 		for (int j = 0; j < width; j++) { // Columns
-			SDL_Rect mapRect = { j * 24, i * 24, 24, 24 };
+			SDL_Rect mapRect = { j * gridSize, i * gridSize, gridSize, gridSize };
 			SDL_RenderDrawRect(renderer, &mapRect);
 		}
 	}
@@ -214,15 +215,15 @@ void Game::Render() {
 	// Draw path
 	SDL_SetRenderDrawColor(renderer, 120, 100, 60, 255); 
 	for (int i = 0; i < pathLength; i++) {
-		SDL_Rect pathTile = { pathX[i] * 24, pathY[i] * 24, 24, 24 };
+		SDL_Rect pathTile = { pathX[i] * gridSize, pathY[i] * gridSize, gridSize, gridSize };
 		SDL_RenderFillRect(renderer, &pathTile);
 	}
 
 	// Draw enemies
 	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 	for (int enemy = 0; enemy < enemies.size(); enemy++) {
-		int circleX = enemies[enemy].getX() * 24 + 12; // Circle center X pixel (tileX * tileSize + tileSize/2)
-		int circleY = enemies[enemy].getY() * 24 + 12; // Circle center Y pixel (tileX * tileSize + tileSize/2)
+		int circleX = enemies[enemy].getX() * gridSize + 12; // Circle center X pixel (tileX * tileSize + tileSize/2)
+		int circleY = enemies[enemy].getY() * gridSize + 12; // Circle center Y pixel (tileX * tileSize + tileSize/2)
 		int radius = 10; // Circle size
 
 		// Loop through tile and draw pixel within radius
@@ -237,12 +238,22 @@ void Game::Render() {
 	}
 
 	
-	SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+	
 	// Draw Tower
 	bool towerHere = false;
 	for (int t = 0; t < towers.size(); t++) {
-		SDL_Rect towerRect = { towers[t].getTowerX() * 24, towers[t].getTowerY() * 24, 24, 24 };
+		int edgeOffset = 8;
+		SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+		SDL_Rect towerRect = { towers[t].getTowerX() * gridSize + edgeOffset /2, towers[t].getTowerY() * gridSize + edgeOffset /2, gridSize - edgeOffset, gridSize - edgeOffset };
 		SDL_RenderFillRect(renderer, &towerRect);
+
+		int centerX = towers[t].getTowerX() * gridSize + 12;
+		int centerY = towers[t].getTowerY() * gridSize + 12;
+
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		SDL_Rect barrelRect = { centerX - 4, centerY - 12, 8, 12 };
+		SDL_RenderFillRect(renderer, &barrelRect);
+
 			switch (towers[t].getRotation()) {
 			case UP:
 				
@@ -258,12 +269,11 @@ void Game::Render() {
 				break;
 			}
 
-		SDL_RenderFillRect(renderer, &towerRect);
 	}
 
 	// Draw cursor (box)
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	SDL_Rect cursorRect = { cursorX * 24, cursorY * 24, 24, 24 };
+	SDL_Rect cursorRect = { cursorX * gridSize, cursorY * gridSize, gridSize, gridSize };
 	SDL_RenderDrawRect(renderer, &cursorRect);
 
 	SDL_RenderPresent(renderer);
@@ -493,7 +503,7 @@ Game::Game() {
 	SDL_Init(SDL_INIT_VIDEO);
 
 
-	window = SDL_CreateWindow("Tower Defence", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width * 24, height * 24, SDL_WINDOW_SHOWN);
+	window = SDL_CreateWindow("Tower Defence", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width * gridSize, height * gridSize, SDL_WINDOW_SHOWN);
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 }
 
