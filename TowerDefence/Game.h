@@ -16,7 +16,7 @@ private:
 	const int width = 25;
 	const int height = 25;
 	int baseHealth = 10;
-	int money = 100;
+	int money = 500;
 	int spawnTick = 0;
 	int gridSize = 24;
 	

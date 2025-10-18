@@ -247,34 +247,78 @@ void Game::Render() {
 		SDL_Rect towerRect = { towers[t].getTowerX() * gridSize + edgeOffset /2, towers[t].getTowerY() * gridSize + edgeOffset /2, gridSize - edgeOffset, gridSize - edgeOffset };
 		SDL_RenderFillRect(renderer, &towerRect);
 
-		int centerX = towers[t].getTowerX() * gridSize + 12;
-		int centerY = towers[t].getTowerY() * gridSize + 12;
+		int centerX = towers[t].getTowerX() * gridSize + gridSize / 2;
+		int centerY = towers[t].getTowerY() * gridSize + gridSize / 2;
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-		SDL_Rect barrelRect = { centerX - 4, centerY - 12, 8, 12 };
-		SDL_RenderFillRect(renderer, &barrelRect);
-
+		
+		
+		SDL_Rect barrelRect;
 			switch (towers[t].getRotation()) {
 			case UP:
-				
+				barrelRect = { centerX - 4, centerY - 12, 8, 12 };
 				break;
 			case RIGHT:
-				
+				barrelRect = { centerX, centerY - 4, 12, 8 };
 				break;
 			case DOWN:
-				
+				barrelRect = { centerX - 4, centerY, 8, 12 };
 				break;
 			case LEFT:
-				
+				barrelRect = { centerX - 12, centerY - 4, 12, 8 };
 				break;
 			}
-
+			SDL_RenderFillRect(renderer, &barrelRect);
 	}
 
-	// Draw cursor (box)
+	// Draw cursor box
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_Rect cursorRect = { cursorX * gridSize, cursorY * gridSize, gridSize, gridSize };
 	SDL_RenderDrawRect(renderer, &cursorRect);
+
+	// Draw cursor arrow
+	int centerX = cursorX * gridSize + gridSize / 2;
+	int centerY = cursorY * gridSize + gridSize / 2;
+	int cusorLength = 10; // How far the pointer sticks out
+
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Yellow for visibility
+	SDL_Rect arrowRect;
+
+	switch (cursorDir) {
+	case UP:
+		arrowRect = { centerX - 2, centerY - cusorLength, 4, cusorLength };
+		break;
+	case RIGHT:
+		arrowRect = { centerX, centerY - 2, cusorLength, 4 };
+		break;
+	case DOWN:
+		arrowRect = { centerX - 2, centerY, 4, cusorLength };
+		break;
+	case LEFT:
+		arrowRect = { centerX - cusorLength, centerY - 2, cusorLength, 4 };
+		break;
+	}
+	SDL_RenderFillRect(renderer, &arrowRect);
+
+	// Draw projectiles
+	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+	for (int p = 0; p < projectiles.size(); p++) {
+		int projX = projectiles[p].getProjX() * gridSize + gridSize / 2; // Center X pixel
+		int projY = projectiles[p].getProjY() * gridSize + gridSize / 2; // Center Y pixel
+		int radius = 4;
+
+		// Loop through tile and draw pixel within radius
+		for (int yOffset = -radius; yOffset <= radius; yOffset++) {
+			for (int xOffset = -radius; xOffset <= radius; xOffset++) {
+				// If within radius 
+				if (xOffset * xOffset + yOffset * yOffset <= radius * radius) {
+					SDL_RenderDrawPoint(renderer, projX + xOffset, projY + yOffset);
+				}
+			}
+		}
+	}
+
+
 
 	SDL_RenderPresent(renderer);
 	SDL_Delay(50);
@@ -287,45 +331,40 @@ void Game::Input() {
 		if (state[SDL_SCANCODE_X]) {
 			gameOver = true;
 		}
-	}
 
-	if (state[SDL_SCANCODE_A]) {
-		cursorX--;
-	}
-	if (state[SDL_SCANCODE_D]) {
-		cursorX++;
-	}
-	if (state[SDL_SCANCODE_W]) {
-		cursorY--;
-	}
-	if (state[SDL_SCANCODE_S]) {
-		cursorY++;
-	}
-	if (state[SDL_SCANCODE_Y]) {
-		waveStart = true;
-	}
-	if (state[SDL_SCANCODE_E]) {
-		// Rotate right
-		cursorDir = static_cast<Direction>((cursorDir + 1) % 4);
-
-	}
-	if (state[SDL_SCANCODE_Q]) {
-		// Rotate left
-		cursorDir = static_cast<Direction>((cursorDir + 3) % 4);
-	}
-	if (state[SDL_SCANCODE_1]) {
-		// Place Tower 1
-		if (money >= 50) {
-			towers.emplace_back(cursorX, cursorY, 1, 2, cursorDir); // Tower damage, range, direction
-			money -= 50;
+		if (event.type == SDL_KEYDOWN) {
+			switch (event.key.keysym.scancode) {
+			case SDL_SCANCODE_E: // Rotate right
+				cursorDir = static_cast<Direction>((cursorDir + 1) % 4);
+				break;
+			case SDL_SCANCODE_Q: // Rotate left
+				cursorDir = static_cast<Direction>((cursorDir + 3) % 4);
+				break;
+			case SDL_SCANCODE_W:
+				cursorY--;
+				break;
+			case SDL_SCANCODE_S:
+				cursorY++;
+				break;
+			case SDL_SCANCODE_A:
+				cursorX--;
+				break;
+			case SDL_SCANCODE_D:
+				cursorX++;
+				break;
+			case SDL_SCANCODE_Y:
+				waveStart = true;
+				break;
+			case SDL_SCANCODE_1:
+				if (money >= 50) {
+					towers.emplace_back(cursorX, cursorY, 1, 2, cursorDir);
+					money -= 50;
+				}
+				break;
+			}
 		}
 	}
-	if (state[SDL_SCANCODE_2]) {
-		// Place Tower 2
-	}
-	if (state[SDL_SCANCODE_3]) {
-		// Place Tower 3
-	}
+
 
 	// Place Tower 
 	if (_kbhit()) {
