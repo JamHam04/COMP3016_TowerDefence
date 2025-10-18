@@ -9,16 +9,7 @@
 
 using namespace std;
 
-
-
-
-
-
-
 //Enemy smallEnemy(1, 5);
-
-
-
 
 void Game::createPath() {
 	int currentCol = 10; // Where path will start 
@@ -201,9 +192,15 @@ void Game::Draw() {
 }
 
 void Game::Render() {
+
+	
+
+
 	// Drawn background
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_SetRenderDrawColor(renderer, 60, 120, 30, 255);
 	SDL_RenderClear(renderer);
+
+	// Draw random points?
 
 	// Draw grid
 	SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255); 
@@ -215,7 +212,7 @@ void Game::Render() {
 	}
 
 	// Draw path
-	SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255); 
+	SDL_SetRenderDrawColor(renderer, 120, 100, 60, 255); 
 	for (int i = 0; i < pathLength; i++) {
 		SDL_Rect pathTile = { pathX[i] * 24, pathY[i] * 24, 24, 24 };
 		SDL_RenderFillRect(renderer, &pathTile);
@@ -224,10 +221,21 @@ void Game::Render() {
 	// Draw enemies
 	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 	for (int enemy = 0; enemy < enemies.size(); enemy++) {
-		SDL_Rect enemyRect = { enemies[enemy].getX() * 24, enemies[enemy].getY() * 24, 24, 24 };
-			SDL_RenderFillRect(renderer, &enemyRect);
-		
+		int circleX = enemies[enemy].getX() * 24 + 12; // Circle center X pixel (tileX * tileSize + tileSize/2)
+		int circleY = enemies[enemy].getY() * 24 + 12; // Circle center Y pixel (tileX * tileSize + tileSize/2)
+		int radius = 10; // Circle size
+
+		// Loop through tile and draw pixel within radius
+		for (int yOffset = -radius; yOffset <= radius; yOffset++) {
+			for (int xOffset = -radius; xOffset <= radius; xOffset++) {
+				// If within radius 
+				if (xOffset * xOffset + yOffset * yOffset <= radius * radius) {
+					SDL_RenderDrawPoint(renderer, circleX + xOffset, circleY + yOffset);
+				}
+			}
+		}
 	}
+
 	
 	SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
 	// Draw Tower
@@ -253,20 +261,14 @@ void Game::Render() {
 		SDL_RenderFillRect(renderer, &towerRect);
 	}
 
-	
-
 	// Draw cursor (box)
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_Rect cursorRect = { cursorX * 24, cursorY * 24, 24, 24 };
 	SDL_RenderDrawRect(renderer, &cursorRect);
 
-
-
-
 	SDL_RenderPresent(renderer);
 	SDL_Delay(50);
 };
-
 
 void Game::Input() {
 	SDL_Event event;
@@ -366,9 +368,6 @@ void Game::Input() {
 
 }
 
-
-
-
 void Game::Logic() {
 	
 
@@ -376,8 +375,8 @@ void Game::Logic() {
 
 	if (waveStart) {
 		spawnTick++; // Spawn delay
-		if (spawnTick >= 10) {
-			enemies.emplace_back(10, 2); // Create new Enemy in vector (health, speed)
+		if (spawnTick >= 25) {
+			enemies.emplace_back(10, 10); // Create new Enemy in vector (health, speed)
 			spawnTick = 0;
 		}
 	}
@@ -488,8 +487,6 @@ void Game::Logic() {
 	// Delete Tower
 	// Remove from vector
 	// Refund cost
-
-
 }
 
 Game::Game() {
@@ -508,8 +505,6 @@ Game::~Game() {
 
 int main(int argc, char* argv[]) {
 
-	
-
 	Game game;
 	game.Setup();
 
@@ -518,7 +513,7 @@ int main(int argc, char* argv[]) {
 		game.Input(); // Player Inputs
 		game.Logic(); // Game Logic
 		game.Render(); // Render map
-		SDL_Delay(100); //Pause loop 
+		//SDL_Delay(100); //Pause loop 
 	}
 
 	return 0;
