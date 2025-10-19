@@ -46,7 +46,6 @@ public:
 
 	// Game functions
 	void Setup();
-	void Draw();
 	void Logic();
 	void Input();
 	void createPath();

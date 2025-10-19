@@ -66,131 +66,6 @@ void Game::Setup() {
 	createPath();
 }
 
-void Game::Draw() {
-	// Draw Map
-	system("cls");
-
-	// Draw top border
-	for (int i = 0; i < width + 2; i++) { //Print one row along the top width (+2 for corners)
-		cout << '#';
-	}
-	cout << endl;
-
-	// Centre Map
-	for (int i = 0; i < height; i++) { // Rows
-		for (int j = 0; j < width; j++) { // Columns
-			if (j == 0) cout << '#'; // Print left border
-
-			// Draw path
-			bool path = false;
-			// Loop through map
-			for (int k = 0; k < pathLength; k++) {
-				if (pathX[k] == j && pathY[k] == i) { // If position is a path
-					path = true; // Set position as path
-					break;
-				}
-			}
-
-			// Draw enemies
-			bool enemySpawn = false;
-			
-			for (int enemy = 0; enemy < enemies.size(); enemy++) {
-				if (enemies[enemy].getX() == j && enemies[enemy].getY() == i)
-				{
-					enemySpawn = true;
-					break;
-				}
-			}
-
-			// Draw Tower
-			bool towerHere = false;
-			for (int t = 0; t < towers.size(); t++) {
-				if (towers[t].getTowerX() == j && towers[t].getTowerY() == i) {
-					switch (towers[t].getRotation()) {
-					case UP:
-						cout << 'A';
-						break;
-					case RIGHT:
-						cout << '>';
-						break;
-					case DOWN:
-						cout << 'V';
-						break;
-					case LEFT:
-						cout << '<';
-						break;
-					}
-					towerHere = true;
-					break;
-				}
-			}
-
-			// Draw protectiles
-			bool projectileHere = false;
-			for (int p = 0; p < projectiles.size(); p++) {
-				if (projectiles[p].getProjX() == j && projectiles[p].getProjY() == i) {
-					cout << 'B';
-					projectileHere = true;
-					break;
-				}
-			}
-			
-			if (towerHere) continue;
-			if (projectileHere) continue;
-			else if (i == cursorY && j == cursorX)
-				if (path)
-					cout << '!';
-				else
-					switch (cursorDir) {
-					case UP:
-						cout << '^';
-						break;
-					case RIGHT:
-						cout << '>';
-						break;
-					case DOWN:
-						cout << 'v';
-						break;
-					case LEFT:
-						cout << '<';
-						break;
-					}
-
-
-			else if (enemySpawn) cout << '0';
-			else if (path) cout << '+'; // print on path position
-			// Else empty space
-			
-			else {
-				cout << ' ';
-			}
-
-			if (j == width - 1) cout << '#'; // Print right border
-
-		}
-		cout << endl; //Move to next row
-	}
-
-	// Draw bottom border
-	for (int i = 0; i < width + 2; i++) { //Print one along the bottom width (+2 for corners)
-		cout << '#';
-	}
-	cout << endl;
-
-
-	// Draw Enemies
-
-	// Controls 
-	cout << "1 - Tower 1 [Price - 50]" << endl; // Shoots in straight line 
-	cout << "2 - Tower 2 [Price - 200]" << endl; // Shoots in 4 directions
-	cout << "3 - Tower 3 [Price - 500]" << endl; // Shoorts in radius
-	// Upgrade ideas - increase damage, range, fire rate, multi shot, pierce, slow
-	// Print Stats
-	cout << endl << "Base Health: " << baseHealth << endl;
-	cout << "Money: " << money;
-	// Print Wave Number
-}
-
 void Game::Render() {
 
 	
@@ -218,6 +93,7 @@ void Game::Render() {
 		SDL_Rect pathTile = { pathX[i] * gridSize, pathY[i] * gridSize, gridSize, gridSize };
 		SDL_RenderFillRect(renderer, &pathTile);
 	}
+	
 
 	// Draw enemies
 	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
@@ -225,6 +101,9 @@ void Game::Render() {
 		int circleX = enemies[enemy].getX() * gridSize + 12; // Circle center X pixel (tileX * tileSize + tileSize/2)
 		int circleY = enemies[enemy].getY() * gridSize + 12; // Circle center Y pixel (tileX * tileSize + tileSize/2)
 		int radius = 10; // Circle size
+
+		// Switch color based on enemy type:
+
 
 		// Loop through tile and draw pixel within radius
 		for (int yOffset = -radius; yOffset <= radius; yOffset++) {
@@ -271,17 +150,32 @@ void Game::Render() {
 			SDL_RenderFillRect(renderer, &barrelRect);
 	}
 
+
+
+	// Draw path
+	bool path = false;
+	// Loop through map
+	for (int k = 0; k < pathLength; k++) {
+		if (pathX[k] == cursorX && pathY[k] == cursorY) { // If position is a path
+			path = true; // Set position as path
+			break;
+		}
+	}
+
 	// Draw cursor box
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	if (path)
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); // Red if on path
+	else
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // White normal
 	SDL_Rect cursorRect = { cursorX * gridSize, cursorY * gridSize, gridSize, gridSize };
 	SDL_RenderDrawRect(renderer, &cursorRect);
 
 	// Draw cursor arrow
 	int centerX = cursorX * gridSize + gridSize / 2;
 	int centerY = cursorY * gridSize + gridSize / 2;
-	int cusorLength = 10; // How far the pointer sticks out
+	int cusorLength = 10; 
 
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Yellow for visibility
+
 	SDL_Rect arrowRect;
 
 	switch (cursorDir) {
@@ -318,6 +212,16 @@ void Game::Render() {
 		}
 	}
 
+	// Print HUD (CONVERT TO SDL)
+	// Controls 
+	cout << "1 - Tower 1 [Price - 50]" << endl; // Shoots in straight line 
+	cout << "2 - Tower 2 [Price - 200]" << endl; // Shoots in 4 directions
+	cout << "3 - Tower 3 [Price - 500]" << endl; // Shoorts in radius
+	// Upgrade ideas - increase damage, range, fire rate, multi shot, pierce, slow
+	// Print Stats
+	cout << endl << "Base Health: " << baseHealth << endl;
+	cout << "Money: " << money;
+	// Print Wave Number
 
 
 	SDL_RenderPresent(renderer);
@@ -558,11 +462,9 @@ int main(int argc, char* argv[]) {
 	game.Setup();
 
 	while (!game.getGameOver()) {
-		//game.Draw(); //Draw map
 		game.Input(); // Player Inputs
 		game.Logic(); // Game Logic
 		game.Render(); // Render map
-		//SDL_Delay(100); //Pause loop 
 	}
 
 	return 0;
