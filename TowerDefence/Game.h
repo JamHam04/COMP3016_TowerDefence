@@ -5,7 +5,7 @@
 #include "Direction.h"
 #include <vector>
 #include <SDL.h>
-
+#include <memory>
 
 class Game
 {
@@ -31,8 +31,8 @@ private:
 	Direction cursorDir;
 
 	// Enemy vectors
-	std::vector<Enemy> enemies; // Store Enemy instances
-	std::vector<Tower> towers; // Store Tower instances
+	std::vector<std::unique_ptr<Enemy>> enemies; // Store Enemy pointers
+	std::vector<std::unique_ptr<Tower>> towers; // Store Tower pointers
 	std::vector<Projectile> projectiles; // Store Projectile instances
 
 	// Render

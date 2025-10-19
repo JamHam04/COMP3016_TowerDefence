@@ -98,8 +98,8 @@ void Game::Render() {
 	// Draw enemies
 	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 	for (int enemy = 0; enemy < enemies.size(); enemy++) {
-		int circleX = enemies[enemy].getX() * gridSize + 12; // Circle center X pixel (tileX * tileSize + tileSize/2)
-		int circleY = enemies[enemy].getY() * gridSize + 12; // Circle center Y pixel (tileX * tileSize + tileSize/2)
+		int circleX = enemies[enemy]->getX() * gridSize + 12; // Circle center X pixel (tileX * tileSize + tileSize/2)
+		int circleY = enemies[enemy]->getY() * gridSize + 12; // Circle center Y pixel (tileX * tileSize + tileSize/2)
 		int radius = 10; // Circle size
 
 		// Switch color based on enemy type:
@@ -123,17 +123,17 @@ void Game::Render() {
 	for (int t = 0; t < towers.size(); t++) {
 		int edgeOffset = 8;
 		SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-		SDL_Rect towerRect = { towers[t].getTowerX() * gridSize + edgeOffset /2, towers[t].getTowerY() * gridSize + edgeOffset /2, gridSize - edgeOffset, gridSize - edgeOffset };
+		SDL_Rect towerRect = { towers[t]->getTowerX() * gridSize + edgeOffset /2, towers[t]->getTowerY() * gridSize + edgeOffset /2, gridSize - edgeOffset, gridSize - edgeOffset };
 		SDL_RenderFillRect(renderer, &towerRect);
 
-		int centerX = towers[t].getTowerX() * gridSize + gridSize / 2;
-		int centerY = towers[t].getTowerY() * gridSize + gridSize / 2;
+		int centerX = towers[t]->getTowerX() * gridSize + gridSize / 2;
+		int centerY = towers[t]->getTowerY() * gridSize + gridSize / 2;
 
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 		
 		
 		SDL_Rect barrelRect;
-			switch (towers[t].getRotation()) {
+			switch (towers[t]->getRotation()) {
 			case UP:
 				barrelRect = { centerX - 4, centerY - 12, 8, 12 };
 				break;
@@ -213,15 +213,15 @@ void Game::Render() {
 	}
 
 	// Print HUD (CONVERT TO SDL)
-	// Controls 
-	cout << "1 - Tower 1 [Price - 50]" << endl; // Shoots in straight line 
-	cout << "2 - Tower 2 [Price - 200]" << endl; // Shoots in 4 directions
-	cout << "3 - Tower 3 [Price - 500]" << endl; // Shoorts in radius
-	// Upgrade ideas - increase damage, range, fire rate, multi shot, pierce, slow
-	// Print Stats
-	cout << endl << "Base Health: " << baseHealth << endl;
-	cout << "Money: " << money;
-	// Print Wave Number
+	//// Controls 
+	//cout << "1 - Tower 1 [Price - 50]" << endl; // Shoots in straight line 
+	//cout << "2 - Tower 2 [Price - 200]" << endl; // Shoots in 4 directions
+	//cout << "3 - Tower 3 [Price - 500]" << endl; // Shoorts in radius
+	//// Upgrade ideas - increase damage, range, fire rate, multi shot, pierce, slow
+	//// Print Stats
+	//cout << endl << "Base Health: " << baseHealth << endl;
+	//cout << "Money: " << money;
+	//// Print Wave Number
 
 
 	SDL_RenderPresent(renderer);
@@ -261,7 +261,7 @@ void Game::Input() {
 				break;
 			case SDL_SCANCODE_1:
 				if (money >= 50) {
-					towers.emplace_back(cursorX, cursorY, 1, 2, cursorDir);
+					towers.push_back(std::make_unique<basicTower>(cursorX, cursorY, cursorDir));
 					money -= 50;
 				}
 				break;
@@ -299,7 +299,7 @@ void Game::Input() {
 		case '1':
 			// Place Tower 1
 			if (money >= 50) {
-				towers.emplace_back(cursorX, cursorY, 1, 2, cursorDir); // Tower damage, range, direction
+				towers.push_back(std::make_unique<basicTower>(cursorX, cursorY, cursorDir)); 
 				money -= 50;
 			}
 			break;
@@ -329,16 +329,16 @@ void Game::Logic() {
 	if (waveStart) {
 		spawnTick++; // Spawn delay
 		if (spawnTick >= 25) {
-			enemies.emplace_back(10, 10); // Create new Enemy in vector (health, speed)
+			enemies.push_back(std::make_unique<smallEnemy>()); // Create new Enemy 
 			spawnTick = 0;
 		}
 	}
 
 	// Move enemies
 	for (int i = 0; i < enemies.size(); ++i) {
-		enemies[i].move(pathX, pathY, pathLength); // Loop through vector and move each
+		enemies[i]->move(pathX, pathY, pathLength); // Loop through vector and move each
 
-		if (enemies[i].getPathPosition() >= pathLength) {
+		if (enemies[i]->getPathPosition() >= pathLength) {
 			// Decrease player health
 			baseHealth--;
 
@@ -349,7 +349,7 @@ void Game::Logic() {
 		}
 
 		// If enemy dead
-		if (enemies[i].getHealth() <= 0) {
+		if (enemies[i]->getHealth() <= 0) {
 			money += 10; // Give money for kill
 			// Delete enemy
 			enemies.erase(enemies.begin() + i); // Delete from vector
@@ -370,20 +370,26 @@ void Game::Logic() {
 
 	// Tower attacks
 	for (int t = 0; t < towers.size(); t++) { // Loop through towers
-		// Get tower stats
-		int towerX = towers[t].getTowerX();
-		int towerY = towers[t].getTowerY();
-		Direction dir = towers[t].getRotation();
-		int range = towers[t].getRange();
-		int damage = towers[t].getDamage();
-		// Check for enemies in range
+		towers[t]->incrementFireTick(); // Increment fire tick
+
+		int towerX = towers[t]->getTowerX();
+		int towerY = towers[t]->getTowerY();
+		Direction dir = towers[t]->getRotation();
+		int range = towers[t]->getRange();
+		int damage = towers[t]->getDamage();
+		//int fireRate = towers[t]->getFireRate();
+		//int fireTick = towers[t]->getFireTick();
+
+		
+
+		if (towers[t]->getFireTick() < towers[t]->getFireRate())
+			continue; // Skip fire 
+
 		for (int e = 0; e < enemies.size(); e++) { // Loop throguh enemies
-			// Get enemy position
-			int enemyX = enemies[e].getX();
-			int enemyY = enemies[e].getY();
+			int enemyX = enemies[e]->getX();
+			int enemyY = enemies[e]->getY();
 			bool inRange = false;
 			switch (dir) {
-			// Check direction and range
 			case UP:
 				if (enemyX == towerX && enemyY < towerY && enemyY >= towerY - range) inRange = true;
 				break;
@@ -408,10 +414,11 @@ void Game::Logic() {
 				case DOWN:  projY++; break;
 				case LEFT:  projX--; break;
 				}
-
 				projectiles.emplace_back(projX, projY, dir, 1, damage);
+				towers[t]->resetFireTick(); // Reset fire tick
+				break;
 
-				break; 
+
 			}
 		}
 	}
@@ -425,9 +432,9 @@ void Game::Logic() {
 		int damage = projectiles[p].getDamage();
 		// Check if hit an enemy
 		for (int e = 0; e < enemies.size(); e++) {
-			if (projX == enemies[e].getX() && projY == enemies[e].getY()) {
+			if (projX == enemies[e]->getX() && projY == enemies[e]->getY()) {
 				// When enemy hit
-				enemies[e].hit(damage); // Apply damage to enemy
+				enemies[e]->hit(damage); // Apply damage to enemy
 				projectiles.erase(projectiles.begin() + p); // Remove projectile
 				// BUG - Projectiles not being removed (projeciles timing step over enemies)
 				p--;
