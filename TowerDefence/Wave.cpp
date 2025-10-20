@@ -3,22 +3,26 @@
 Wave::Wave(int rate, int totalEnemies, int type) : spawnRate(rate), enemiesRemaining(totalEnemies), enemyType(type),enemiesSpawned(0), spawnTick(0)
 {}
 
-bool Wave::spawnEnemies() {
-	if (enemiesSpawned >= enemiesRemaining)
-		return true; // Complete wave
+std::vector<std::unique_ptr<Enemy>> Wave::spawnEnemies() {
+	std::vector<std::unique_ptr<Enemy>> waveEnemies;
+
 	spawnTick++;
 	if (spawnTick >= spawnRate) {
 		// Enemy types
 		switch (enemyType) {
 		case 0:
-			enemies.push_back(std::make_unique<smallEnemy>());
+			waveEnemies.push_back(std::make_unique<smallEnemy>());
 			break;
 		case 1:
-			enemies.push_back(std::make_unique<mediumEnemy>());
+			waveEnemies.push_back(std::make_unique<mediumEnemy>());
 			break;
 		}
 		enemiesSpawned++; // Increase enemy spawn 
 		spawnTick = 0; // Reset spawn tick
 	}
-	return false;
+	return waveEnemies;
+}
+
+bool Wave::waveComplete() {
+	return enemiesSpawned >= enemiesRemaining;
 }

@@ -66,8 +66,8 @@ void Game::Setup() {
 	createPath();
 
 	// Setup waves
-	waves.push_back(std::make_unique<Wave>(25, 10, 0)); // 10 smallEnemy, spawn every 25 ticks
-	waves.push_back(std::make_unique<Wave>(20, 5, 1));  // 5 mediumEnemy, spawn every 20 ticks
+	waves.push_back(std::make_unique<Wave>(25, 2, 0)); // 10 smallEnemy, spawn every 25 ticks
+	waves.push_back(std::make_unique<Wave>(20, 3, 1));  // 5 mediumEnemy, spawn every 20 ticks
 	waves.push_back(std::make_unique<Wave>(15, 15, 0)); // 15 smallEnemy, spawn every 15 ticks
 }
 
@@ -312,23 +312,25 @@ void Game::Logic() {
 	// Enemy waves
 	if (waveStart) {
 
-	std::vector<std::unique_ptr<Enemy>> waveEnemies = waves[currentWave]->getEnemies();
+	auto waveEnemies = waves[currentWave]->spawnEnemies();
 
-	for (std::unique_ptr<Enemy> enemy : waveEnemies) {
-		enemies.push_back(std::move(enemy)); // Move enemies to enemy vector
+
+	for (auto& enemy : waveEnemies) {
+		enemies.push_back(std::move(enemy));
 	}
+	waveEnemies.clear();
 	// If wave complete
-		if (waves[currentWave]->spawnEnemies()) {
+		if (waves[currentWave]->waveComplete()) {
 
 		
 
 			waveStart = false; // End wave
 			currentWave++; // Next wave
-			spawnTick = 0; // Reset spawn tick
+
 
 			// If all waves complete
 			if (currentWave >= waves.size()) {
-				cout << endl << "ALL WAVES COMPLETE! YOU WIN!";
+				// print SDL endscreen
 				gameOver = true;
 			}
 		}
@@ -337,13 +339,13 @@ void Game::Logic() {
 
 	// Spawn enemies
 
-	if (waveStart) {
-		spawnTick++; // Spawn delay
-		if (spawnTick >= 25) {
-			enemies.push_back(std::make_unique<smallEnemy>()); // Create new Enemy 
-			spawnTick = 0;
-		}
-	}
+	//if (waveStart) {
+	//	spawnTick++; // Spawn delay
+	//	if (spawnTick >= 25) {
+	//		enemies.push_back(std::make_unique<smallEnemy>()); // Create new Enemy 
+	//		spawnTick = 0;
+	//	}
+	//}
 
 	// Move enemies
 	for (int i = 0; i < enemies.size(); ++i) {

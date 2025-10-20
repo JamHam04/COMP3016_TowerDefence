@@ -14,7 +14,8 @@ private:
 public:
 	Wave(int rate, int totalEnemies, int type);
 
-	bool spawnEnemies();
+	std::vector<std::unique_ptr<Enemy>> spawnEnemies();
+	bool waveComplete();
 
-	std::vector<std::unique_ptr<Enemy>> getEnemies() { return enemies; }
+	//std::vector<std::unique_ptr<Enemy>>& getEnemies() { return enemies; }
 };
