@@ -64,6 +64,11 @@ void Game::createPath() {
 void Game::Setup() {
 	// Set Variables
 	createPath();
+
+	// Setup waves
+	waves.push_back(std::make_unique<Wave>(25, 10, 0)); // 10 smallEnemy, spawn every 25 ticks
+	waves.push_back(std::make_unique<Wave>(20, 5, 1));  // 5 mediumEnemy, spawn every 20 ticks
+	waves.push_back(std::make_unique<Wave>(15, 15, 0)); // 15 smallEnemy, spawn every 15 ticks
 }
 
 void Game::Render() {
@@ -232,7 +237,7 @@ void Game::Input() {
 	SDL_Event event;
 	const Uint8* state = SDL_GetKeyboardState(NULL);
 	while (SDL_PollEvent(&event)) {
-		if (state[SDL_SCANCODE_X]) {
+		if (state[SDL_SCANCODE_L]) {
 			gameOver = true;
 		}
 
@@ -265,64 +270,70 @@ void Game::Input() {
 					money -= 50;
 				}
 				break;
+
+			case SDL_SCANCODE_2:
+				if (money >= 100) {
+					towers.push_back(std::make_unique<longRangeTower>(cursorX, cursorY, cursorDir));
+					money -= 100;
+				}
+				break;
+			case SDL_SCANCODE_3:
+				if (money >= 200) {
+					towers.push_back(std::make_unique<heavyDamageTower>(cursorX, cursorY, cursorDir));
+					money -= 200;
+				}
+				break;
+			case SDL_SCANCODE_4:
+				if (money >= 300) {
+					towers.push_back(std::make_unique<fourWayTower>(cursorX, cursorY, cursorDir));
+					money -= 300;
+				}
+				break;
 			}
+		
+
 		}
 	}
 
 
-	// Place Tower 
-	if (_kbhit()) {
-		switch (_getch()) {
-		case 'a':
-			cursorX--;
-			break;
-		case 'd':
-			cursorX++;
-			break;
-		case 'w':
-			cursorY--;
-			break;
-		case 's':
-			cursorY++;
-			break;
-		case 'y':
-			waveStart = true;
-			break;
-		case 'e':
-			// Rotate right
-			cursorDir = static_cast<Direction>((cursorDir + 1) % 4);
-			break;
-		case 'q':
-			// Rotate left
-			cursorDir = static_cast<Direction>((cursorDir + 3) % 4); 
-			break;
-		case '1':
-			// Place Tower 1
-			if (money >= 50) {
-				towers.push_back(std::make_unique<basicTower>(cursorX, cursorY, cursorDir)); 
-				money -= 50;
-			}
-			break;
-		case '2':
-			waveStart = true;
-			break;
-		case '3':
-			waveStart = true;
-			break;
-		}
-	}
+	
 
 	// Wave Start
 	
-	if (!waveStart) {
+	/*if (!waveStart) {
 		cout << endl << "Press Y to start wave";
-	}
+	}*/
 	// Upgrade Tower
 
 }
 
 void Game::Logic() {
-	
+
+	// Enemy waves
+	if (waveStart) {
+
+	std::vector<std::unique_ptr<Enemy>> waveEnemies = waves[currentWave]->getEnemies();
+
+	for (std::unique_ptr<Enemy> enemy : waveEnemies) {
+		enemies.push_back(std::move(enemy)); // Move enemies to enemy vector
+	}
+	// If wave complete
+		if (waves[currentWave]->spawnEnemies()) {
+
+		
+
+			waveStart = false; // End wave
+			currentWave++; // Next wave
+			spawnTick = 0; // Reset spawn tick
+
+			// If all waves complete
+			if (currentWave >= waves.size()) {
+				cout << endl << "ALL WAVES COMPLETE! YOU WIN!";
+				gameOver = true;
+			}
+		}
+	}
+
 
 	// Spawn enemies
 
@@ -364,7 +375,7 @@ void Game::Logic() {
 		cout << endl <<"GAME OVER";
 	}
 
-	// Enemy waves
+	
 
 
 
@@ -430,19 +441,27 @@ void Game::Logic() {
 		int projX = projectiles[p].getProjX();
 		int projY = projectiles[p].getProjY();
 		int damage = projectiles[p].getDamage();
+		bool enemyHit = false;
 		// Check if hit an enemy
 		for (int e = 0; e < enemies.size(); e++) {
 			if (projX == enemies[e]->getX() && projY == enemies[e]->getY()) {
 				// When enemy hit
 				enemies[e]->hit(damage); // Apply damage to enemy
-				projectiles.erase(projectiles.begin() + p); // Remove projectile
-				// BUG - Projectiles not being removed (projeciles timing step over enemies)
-				p--;
+				
+		
+				enemyHit = true; // Remove projectile after loop
 					
 				break;
 			}
 		}
+
+		if (enemyHit) {
+			projectiles.erase(projectiles.begin() + p); // Remove projectile
+			p--;
+		}
 	}
+
+
 
 	// Delete Tower
 	// Remove from vector

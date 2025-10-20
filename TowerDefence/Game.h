@@ -6,6 +6,8 @@
 #include <vector>
 #include <SDL.h>
 #include <memory>
+#include "Wave.h"
+
 
 class Game
 {
@@ -19,6 +21,7 @@ private:
 	int money = 500;
 	int spawnTick = 0;
 	int gridSize = 24;
+	int currentWave = 0;
 	
 
 	// Path coordinates
@@ -33,7 +36,9 @@ private:
 	// Enemy vectors
 	std::vector<std::unique_ptr<Enemy>> enemies; // Store Enemy pointers
 	std::vector<std::unique_ptr<Tower>> towers; // Store Tower pointers
+	std::vector<std::unique_ptr<Wave>> waves;
 	std::vector<Projectile> projectiles; // Store Projectile instances
+	
 
 	// Render
 	SDL_Window* window;
