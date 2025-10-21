@@ -9,8 +9,6 @@
 
 using namespace std;
 
-//Enemy smallEnemy(1, 5);
-
 void Game::createPath() {
 	int currentCol = 10; // Where path will start 
 	int currentPath = 0;
@@ -69,6 +67,124 @@ void Game::Setup() {
 	waves.push_back(std::make_unique<Wave>(25, 2, 0)); // 10 smallEnemy, spawn every 25 ticks
 	waves.push_back(std::make_unique<Wave>(20, 3, 1));  // 5 mediumEnemy, spawn every 20 ticks
 	waves.push_back(std::make_unique<Wave>(15, 15, 0)); // 15 smallEnemy, spawn every 15 ticks
+
+	// TO DOL: ADD MORE WAVES
+}
+
+void drawTower(SDL_Renderer* renderer, int towerX, int towerY, int gridSize, Direction dir, towerType type) {
+	
+	int edgeOffset = 0;
+		switch (type) {
+		case BASIC:
+			SDL_SetRenderDrawColor(renderer, 0, 255, 255, 255);
+			edgeOffset = 8;
+			break;
+		case LONG_RANGE:
+			SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+			edgeOffset = 10;
+			break;
+		case HEAVY_DAMAGE:
+			SDL_SetRenderDrawColor(renderer, 255, 0, 255, 255);
+			edgeOffset = 6;
+			break;
+		case FOUR_WAY:
+			SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+			edgeOffset = 4;
+			break;
+		}
+
+		SDL_Rect towerRect = { towerX * gridSize + edgeOffset / 2, towerY * gridSize + edgeOffset / 2, gridSize - edgeOffset, gridSize - edgeOffset };
+		SDL_RenderFillRect(renderer, &towerRect);
+
+		int centerX = towerX * gridSize + gridSize / 2;
+		int centerY = towerY * gridSize + gridSize / 2;
+
+
+		SDL_Rect barrelRect;
+		int barrelLength = 0;
+		int barrelWidth = 0;
+
+		SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255); // Barrel color
+
+		switch (type) {
+		case BASIC:
+			barrelLength = 12;
+			barrelWidth = 8;
+			switch (dir) {
+			case UP:
+				barrelRect = { centerX - barrelWidth / 2, centerY - barrelLength, barrelWidth, barrelLength };
+				break;
+			case RIGHT:
+				barrelRect = { centerX, centerY - barrelWidth / 2, barrelLength, barrelWidth };
+				break;
+			case DOWN:
+				barrelRect = { centerX - barrelWidth / 2, centerY, barrelWidth, barrelLength };
+				break;
+			case LEFT:
+				barrelRect = { centerX - barrelLength, centerY - barrelWidth / 2, barrelLength, barrelWidth };
+				break;
+			}
+			SDL_RenderFillRect(renderer, &barrelRect);
+			break;
+
+		case LONG_RANGE:
+			barrelLength = 16;
+			barrelWidth = 6;
+			switch (dir) {
+			case UP:
+				barrelRect = { centerX - barrelWidth / 2, centerY - barrelLength, barrelWidth, barrelLength };
+				break;
+			case RIGHT:
+				barrelRect = { centerX, centerY - barrelWidth / 2, barrelLength, barrelWidth };
+				break;
+			case DOWN:
+				barrelRect = { centerX - barrelWidth / 2, centerY, barrelWidth, barrelLength };
+				break;
+			case LEFT:
+				barrelRect = { centerX - barrelLength, centerY - barrelWidth / 2, barrelLength, barrelWidth };
+				break;
+			}
+			SDL_RenderFillRect(renderer, &barrelRect);
+			break;
+
+		case HEAVY_DAMAGE:
+			barrelLength = 12;
+			barrelWidth = 10;
+			switch (dir) {
+			case UP:
+				barrelRect = { centerX - barrelWidth / 2, centerY - barrelLength, barrelWidth, barrelLength };
+				break;
+			case RIGHT:
+				barrelRect = { centerX, centerY - barrelWidth / 2, barrelLength, barrelWidth };
+				break;
+			case DOWN:
+				barrelRect = { centerX - barrelWidth / 2, centerY, barrelWidth, barrelLength };
+				break;
+			case LEFT:
+				barrelRect = { centerX - barrelLength, centerY - barrelWidth / 2, barrelLength, barrelWidth };
+				break;
+			}
+			SDL_RenderFillRect(renderer, &barrelRect);
+			break;
+
+		case FOUR_WAY:
+			barrelLength = 14;
+			barrelWidth = 6;
+			// Up
+			barrelRect = { centerX - barrelWidth / 2, centerY - barrelLength, barrelWidth, barrelLength };
+			SDL_RenderFillRect(renderer, &barrelRect);
+			// Right
+			barrelRect = { centerX, centerY - barrelWidth / 2, barrelLength, barrelWidth };
+			SDL_RenderFillRect(renderer, &barrelRect);
+			// Down
+			barrelRect = { centerX - barrelWidth / 2, centerY, barrelWidth, barrelLength };
+			SDL_RenderFillRect(renderer, &barrelRect);
+			// Left
+			barrelRect = { centerX - barrelLength, centerY - barrelWidth / 2, barrelLength, barrelWidth };
+			SDL_RenderFillRect(renderer, &barrelRect);
+			break;
+		}
+	
 }
 
 void Game::Render() {
@@ -124,36 +240,10 @@ void Game::Render() {
 	
 	
 	// Draw Tower
-	bool towerHere = false;
 	for (int t = 0; t < towers.size(); t++) {
-		int edgeOffset = 8;
-		SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-		SDL_Rect towerRect = { towers[t]->getTowerX() * gridSize + edgeOffset /2, towers[t]->getTowerY() * gridSize + edgeOffset /2, gridSize - edgeOffset, gridSize - edgeOffset };
-		SDL_RenderFillRect(renderer, &towerRect);
-
-		int centerX = towers[t]->getTowerX() * gridSize + gridSize / 2;
-		int centerY = towers[t]->getTowerY() * gridSize + gridSize / 2;
-
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-		
-		
-		SDL_Rect barrelRect;
-			switch (towers[t]->getRotation()) {
-			case UP:
-				barrelRect = { centerX - 4, centerY - 12, 8, 12 };
-				break;
-			case RIGHT:
-				barrelRect = { centerX, centerY - 4, 12, 8 };
-				break;
-			case DOWN:
-				barrelRect = { centerX - 4, centerY, 8, 12 };
-				break;
-			case LEFT:
-				barrelRect = { centerX - 12, centerY - 4, 12, 8 };
-				break;
-			}
-			SDL_RenderFillRect(renderer, &barrelRect);
+		drawTower(renderer, towers[t]->getTowerX(), towers[t]->getTowerY(), gridSize, towers[t]->getRotation(), towers[t]->getTowerType());
 	}
+
 
 
 
@@ -337,16 +427,6 @@ void Game::Logic() {
 	}
 
 
-	// Spawn enemies
-
-	//if (waveStart) {
-	//	spawnTick++; // Spawn delay
-	//	if (spawnTick >= 25) {
-	//		enemies.push_back(std::make_unique<smallEnemy>()); // Create new Enemy 
-	//		spawnTick = 0;
-	//	}
-	//}
-
 	// Move enemies
 	for (int i = 0; i < enemies.size(); ++i) {
 		enemies[i]->move(pathX, pathY, pathLength); // Loop through vector and move each
@@ -390,48 +470,53 @@ void Game::Logic() {
 		Direction dir = towers[t]->getRotation();
 		int range = towers[t]->getRange();
 		int damage = towers[t]->getDamage();
-		//int fireRate = towers[t]->getFireRate();
-		//int fireTick = towers[t]->getFireTick();
+		towerType type = towers[t]->getTowerType();
+
 
 		
 
 		if (towers[t]->getFireTick() < towers[t]->getFireRate())
 			continue; // Skip fire 
 
-		for (int e = 0; e < enemies.size(); e++) { // Loop throguh enemies
-			int enemyX = enemies[e]->getX();
-			int enemyY = enemies[e]->getY();
-			bool inRange = false;
-			switch (dir) {
-			case UP:
-				if (enemyX == towerX && enemyY < towerY && enemyY >= towerY - range) inRange = true;
-				break;
-			case RIGHT:
-				if (enemyY == towerY && enemyX > towerX && enemyX <= towerX + range) inRange = true;
-				break;
-			case DOWN:
-				if (enemyX == towerX && enemyY > towerY && enemyY <= towerY + range) inRange = true;
-				break;
-			case LEFT:
-				if (enemyY == towerY && enemyX < towerX && enemyX >= towerX - range) inRange = true;
-				break;
-			}
-			// If enemy in range
-			if (inRange) {
-				int projX = towerX;
-				int projY = towerY;
-
+		if (type == FOUR_WAY) {
+			// Able to attack in all 4 direction independently
+			
+		}
+		else {
+			for (int e = 0; e < enemies.size(); e++) { // Loop throguh enemies
+				int enemyX = enemies[e]->getX();
+				int enemyY = enemies[e]->getY();
+				bool inRange = false;
 				switch (dir) {
-				case UP:    projY--; break;
-				case RIGHT: projX++; break;
-				case DOWN:  projY++; break;
-				case LEFT:  projX--; break;
+				case UP:
+					if (enemyX == towerX && enemyY < towerY && enemyY >= towerY - range) inRange = true;
+					break;
+				case RIGHT:
+					if (enemyY == towerY && enemyX > towerX && enemyX <= towerX + range) inRange = true;
+					break;
+				case DOWN:
+					if (enemyX == towerX && enemyY > towerY && enemyY <= towerY + range) inRange = true;
+					break;
+				case LEFT:
+					if (enemyY == towerY && enemyX < towerX && enemyX >= towerX - range) inRange = true;
+					break;
 				}
-				projectiles.emplace_back(projX, projY, dir, 1, damage);
-				towers[t]->resetFireTick(); // Reset fire tick
-				break;
+				// If enemy in range
+				if (inRange) {
+					int projX = towerX;
+					int projY = towerY;
 
+					switch (dir) {
+					case UP:    projY--; break;
+					case RIGHT: projX++; break;
+					case DOWN:  projY++; break;
+					case LEFT:  projX--; break;
+					}
+					projectiles.emplace_back(projX, projY, dir, 1, damage);
+					towers[t]->resetFireTick(); // Reset fire tick
+					break;
 
+				}
 			}
 		}
 	}

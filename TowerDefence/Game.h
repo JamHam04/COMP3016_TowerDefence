@@ -18,7 +18,7 @@ private:
 	const int width = 25;
 	const int height = 25;
 	int baseHealth = 10;
-	int money = 500;
+	int money = 5000;
 	int spawnTick = 0;
 	int gridSize = 24;
 	int currentWave = 0;
