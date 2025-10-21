@@ -28,14 +28,14 @@ public:
 
 class smallEnemy : public Enemy {
 public: 
-	smallEnemy() : Enemy(5, 1) {} // Health 5, Speed 1
+	smallEnemy() : Enemy(5, 5) {} // Health 5, Speed 1
 };
 
 class mediumEnemy : public Enemy {
 public:
-	mediumEnemy() : Enemy(10, 2) {} // Health 10, Speed 2
+	mediumEnemy() : Enemy(10, 8) {} // Health 10, Speed 2
 };
 class largeEnemy : public Enemy {
 public:
-	largeEnemy() : Enemy(20, 3) {} // Health 20, Speed 3
+	largeEnemy() : Enemy(20, 12) {} // Health 20, Speed 3
 };

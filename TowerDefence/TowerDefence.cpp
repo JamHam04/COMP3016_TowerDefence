@@ -307,6 +307,48 @@ void Game::Render() {
 		}
 	}
 
+	// Upgrade Menu
+	if (openUpgradeMenu) {
+		int menyX = cursorX * gridSize;
+		int menyY = cursorY * gridSize;
+
+		// Draw upgrade menu background
+		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200); 
+		SDL_Rect upgradeMenuRect = { menyX, menyY, 160, 110 };
+		SDL_RenderFillRect(renderer, &upgradeMenuRect);
+		
+		// Draw upgrade options 
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+		SDL_Rect upgrade1Rect = { menyX + 10, menyY + 10, 140, 40 };
+		SDL_Rect upgrade2Rect = { menyX + 10, menyY + 60, 140, 40 };
+		SDL_RenderFillRect(renderer, &upgrade1Rect);
+		SDL_RenderFillRect(renderer, &upgrade2Rect);
+
+		// Upgrade Text
+		SDL_Color textColor = {255, 0, 0, 255};
+		SDL_Surface* upgradeDamageSurface = TTF_RenderText_Blended(font, "1 - Damage 0/3", textColor);
+		SDL_Surface* upgradeRangeSurface = TTF_RenderText_Blended(font, "2 - Range 0/3", textColor);
+
+		SDL_Texture* upgradeDamageTexture = SDL_CreateTextureFromSurface(renderer, upgradeDamageSurface);
+		SDL_Texture* upgradeRangeTexture = SDL_CreateTextureFromSurface(renderer, upgradeRangeSurface);
+
+		int upgradeDamageW, upgradeDamageH;
+		int upgradeRangeW, upgradeRangeH;
+		SDL_QueryTexture(upgradeDamageTexture, NULL, NULL, &upgradeDamageW, &upgradeDamageH);
+		SDL_QueryTexture(upgradeRangeTexture, NULL, NULL, &upgradeRangeW, &upgradeRangeH);
+
+		SDL_Rect upgradeDamageTextRect = {menyX + 15, menyY + 20,upgradeDamageW, upgradeDamageH };
+		SDL_Rect upgradeRangeTextRect = {menyX + 15, menyY + 70, upgradeRangeW, upgradeRangeH};
+
+		SDL_RenderCopy(renderer, upgradeDamageTexture, NULL, &upgradeDamageTextRect);
+		SDL_RenderCopy(renderer, upgradeRangeTexture, NULL, &upgradeRangeTextRect);
+
+		SDL_FreeSurface(upgradeDamageSurface);
+		SDL_FreeSurface(upgradeRangeSurface);
+		SDL_DestroyTexture(upgradeDamageTexture);
+		SDL_DestroyTexture(upgradeRangeTexture);
+	}
+
 	// Print HUD (CONVERT TO SDL)
 	//// Controls 
 	//cout << "1 - Tower 1 [Price - 50]" << endl; // Shoots in straight line 
@@ -379,7 +421,26 @@ void Game::Input() {
 					money -= 300;
 				}
 				break;
+			case SDL_SCANCODE_F:
+				// Upgrade tower at cursor position
+				for (int t = 0; t < towers.size(); t++) {
+					if (towers[t]->getTowerX() == cursorX && towers[t]->getTowerY() == cursorY) {
+						// Open upgrade menu
+						if (openUpgradeMenu) {
+							openUpgradeMenu = false; // Close if already open
+							break;
+						}
+						else {
+							openUpgradeMenu = true;
+							selectedTower = t;
+							break;
+						}
+					}
+				}
+
+				break;
 			}
+	
 		
 
 		}
@@ -486,6 +547,7 @@ void Game::Logic() {
 			for (int e = 0; e < enemies.size(); e++) { // Loop throguh enemies
 				int enemyX = enemies[e]->getX();
 				int enemyY = enemies[e]->getY();
+
 				bool inRange = false;
 				switch (dir) {
 				case UP:
@@ -555,19 +617,6 @@ void Game::Logic() {
 	// Refund cost
 }
 
-Game::Game() {
-	SDL_Init(SDL_INIT_VIDEO);
-
-
-	window = SDL_CreateWindow("Tower Defence", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width * gridSize, height * gridSize, SDL_WINDOW_SHOWN);
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-}
-
-Game::~Game() {
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
-};
 
 int main(int argc, char* argv[]) {
 

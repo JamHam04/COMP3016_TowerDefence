@@ -7,7 +7,7 @@
 #include <SDL.h>
 #include <memory>
 #include "Wave.h"
-
+#include <SDL_ttf.h>
 
 class Game
 {
@@ -22,6 +22,8 @@ private:
 	int spawnTick = 0;
 	int gridSize = 24;
 	int currentWave = 0;
+	bool openUpgradeMenu = false;
+	int selectedTower = 0;
 	
 
 	// Path coordinates
@@ -43,6 +45,8 @@ private:
 	// Render
 	SDL_Window* window;
 	SDL_Renderer* renderer;
+	TTF_Font* font;
+
 public:
 	// Render
 	Game();
