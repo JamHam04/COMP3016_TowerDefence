@@ -8,6 +8,7 @@
 #include <memory>
 #include "Wave.h"
 #include <SDL_ttf.h>
+#include <string>
 
 class Game
 {

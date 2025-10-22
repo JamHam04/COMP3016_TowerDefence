@@ -325,9 +325,11 @@ void Game::Render() {
 		SDL_RenderFillRect(renderer, &upgrade2Rect);
 
 		// Upgrade Text
+		string upgradeDamageText = "1 - Damage " + to_string(towers[selectedTower]->getUpgrade1Level()) + "/" + to_string(towers[selectedTower]->getMaxUpgrade1Level());
+		string upgradeRangeText = "2 - Range" + to_string(towers[selectedTower]->getUpgrade2Level()) + " / " + to_string(towers[selectedTower]->getMaxUpgrade2Level());
 		SDL_Color textColor = {255, 0, 0, 255};
-		SDL_Surface* upgradeDamageSurface = TTF_RenderText_Blended(font, "1 - Damage 0/3", textColor);
-		SDL_Surface* upgradeRangeSurface = TTF_RenderText_Blended(font, "2 - Range 0/3", textColor);
+		SDL_Surface* upgradeDamageSurface = TTF_RenderText_Blended(font, upgradeDamageText.c_str(), textColor);
+		SDL_Surface* upgradeRangeSurface = TTF_RenderText_Blended(font, upgradeRangeText.c_str(), textColor);
 
 		SDL_Texture* upgradeDamageTexture = SDL_CreateTextureFromSurface(renderer, upgradeDamageSurface);
 		SDL_Texture* upgradeRangeTexture = SDL_CreateTextureFromSurface(renderer, upgradeRangeSurface);
@@ -437,8 +439,27 @@ void Game::Input() {
 						}
 					}
 				}
-
 				break;
+
+
+			}
+
+			// buy upgrades
+			if (openUpgradeMenu) {
+				switch (event.key.keysym.scancode) {
+				case SDL_SCANCODE_1: // Upgrade 1 selected
+					if (selectedTower >= 0 && selectedTower < towers.size()) {
+						towers[selectedTower]->upgradeDamage();
+						openUpgradeMenu = false; // Close menu
+					}
+					break;
+				case SDL_SCANCODE_2: // Upgrade 2 selected
+					if (selectedTower >= 0 && selectedTower < towers.size()) {
+						towers[selectedTower]->upgradeRange();
+						openUpgradeMenu = false;
+					}
+					break;
+				}
 			}
 	
 		

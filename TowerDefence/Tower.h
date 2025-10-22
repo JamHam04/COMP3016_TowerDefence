@@ -12,16 +12,20 @@ protected:
 	int fireRate; 
 	int fireTick;
 
-	int upgradeLevel = 1;
-	int maxUpgradeLevel = 3;
+	int upgrade1Level = 0;
+	int upgrade2Level = 0;
+	int maxUpgrade1Level = 3;
+	int maxUpgrade2Level = 3;
 	int upgradeCost = 100; // Initial upgrade cost
+
+	
 	
 
 public:
 
 
 
-	Tower(int x, int y, int d, int r, Direction dir, int rate);
+	Tower(int x, int y, int d, int r, Direction dir, int rate); 
 
 	virtual ~Tower() {};
 	virtual towerType getTowerType() const = 0;
@@ -46,6 +50,12 @@ public:
 	int getDamage() const { return towerDamage; }
 	int getFireRate() const { return fireRate; }
 	int getFireTick() const { return fireTick; }
+	int getUpgrade1Level() const { return upgrade1Level; }
+	int getUpgrade2Level() const { return upgrade2Level; }
+	int getUpgradeCost() const { return upgradeCost; }
+	int getMaxUpgrade1Level() const { return maxUpgrade1Level; }
+	int getMaxUpgrade2Level() const { return maxUpgrade2Level; }
+
 
 
 };
@@ -56,7 +66,9 @@ class basicTower : public Tower {
 
 		basicTower(int x, int y, Direction dir) : Tower(x, y, 1, 5, dir, 20) {} // Damage 1, Range 5, Fire Rate 20 (Adjust)
 		virtual towerType getTowerType() const { return BASIC; }
-		virtual bool upgrade();
+
+		bool upgradeDamage();     
+		bool upgradeMultiShot();
 };
 
 class longRangeTower : public Tower {
@@ -65,7 +77,9 @@ class longRangeTower : public Tower {
 
 		longRangeTower(int x, int y, Direction dir) : Tower(x, y, 1, 10, dir, 10) {} // Damage 1, Range 10
 		virtual towerType getTowerType() const { return LONG_RANGE; }
-		virtual bool upgrade();
+		
+		bool upgradePierce();
+		bool upgradeRange();
 };
 
 class heavyDamageTower : public Tower {
@@ -74,12 +88,16 @@ class heavyDamageTower : public Tower {
 
 		heavyDamageTower(int x, int y, Direction dir) : Tower(x, y, 3, 3, dir, 10) {} // Damage 3, Range 3
 		virtual towerType getTowerType() const { return HEAVY_DAMAGE; }
-		virtual bool upgrade();
+		
+		bool upgradeSlow();
+		bool upgradeRange();
 };
 
 class fourWayTower : public Tower {
 	public:
 		fourWayTower(int x, int y, Direction dir) : Tower(x, y, 1, 4, dir, 10) {} // Damage 1, Range 4, shoots in all directions
 		virtual towerType getTowerType() const { return FOUR_WAY; }
-		virtual bool upgrade();
+		
+		bool upgradeFireRate();
+		bool upgradeRange();
 };
