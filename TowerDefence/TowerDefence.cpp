@@ -240,16 +240,37 @@ void drawEnemy(SDL_Renderer* renderer, int x, int y, int gridSize, Enemy* enemy,
 
 void Game::drawTowerControls() {
 
-
-
-	int controlX = 10;
-	int controlY = gridSize * 4; // 4 tower types
+	int controlX = 5;
+	int controlY = 21 * gridSize; // 4 tower types
+	int controlWidth = gridSize * 2;
+	int controlHeight = gridSize * 4;
 
 	SDL_Color textColor = { 255, 255, 255, 255 };
 
+	// Draw control background
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150);
+	SDL_Rect controlRect = { controlX - 5 , controlY , controlWidth, controlHeight };
+	SDL_RenderFillRect(renderer, &controlRect);
+	
 	// For each tower type
 	for (int i = 0; i < 4; ++i) {
-		
+		std::string controlText = std::to_string(i + 1);
+		SDL_Surface* controlSurface = TTF_RenderText_Blended(font, controlText.c_str(), textColor);
+		SDL_Texture* controlTexture = SDL_CreateTextureFromSurface(renderer, controlSurface);
+		int w, h;
+		SDL_QueryTexture(controlTexture, NULL, NULL, &w, &h);
+		SDL_Rect controlRect = { controlX, controlY + i * gridSize, w, h };
+		SDL_RenderCopy(renderer, controlTexture, NULL, &controlRect);
+		SDL_FreeSurface(controlSurface);
+		SDL_DestroyTexture(controlTexture);
+
+		towerType type = static_cast<towerType>(i);  
+
+		// Draw towers
+		drawTower(renderer, 1, (controlY / gridSize) + i, gridSize, UP, type);
+
+
 	}
 }
 
@@ -263,6 +284,7 @@ void Game::drawHUD() {
 	SDL_Color textColor = { 255, 255, 255, 255 };
 
 	// Draw HUD background
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150);
 	SDL_Rect hudRect = { hudX - 5, hudY - 5, hudWidth, hudHeight};
 	SDL_RenderFillRect(renderer, &hudRect);
@@ -499,26 +521,43 @@ void Game::Render() {
 
 
 
-bool Game::isTileFree (int x, int y) {
+bool Game::isTileFree(int x, int y) {
 	// Check if tile has tower 
 	for (int t = 0; t < towers.size(); t++) {
 		if (towers[t]->getTowerX() == x && towers[t]->getTowerY() == y) {
 			return false; // Tower in tile
 		}
 	}
+	for (int k = 0; k < pathLength; k++) {
+		if (pathX[k] == cursorX && pathY[k] == cursorY) { // If position is a path
+			return false;
+		}
 
+		
+	}
 	return true; // Tile is free
 }
 
 bool Game::isTileHUD (int x, int y) {
+	// HUD area
 	int hudX = 5;
 	int hudY = 5;
-	int hudWidth = gridSize * 6;
+	int hudWidth = gridSize * 8;
 	int hudHeight = gridSize * 4;
 	// Check if tile is inside HUD area
 	if (x * gridSize >= hudX - 5 && x * gridSize < hudX - 5 + hudWidth &&
 		y * gridSize >= hudY - 5 && y * gridSize < hudY - 5 + hudHeight) {
 		return true; // HUD tile
+	}
+
+	// Tower controls area
+	int controlX = 0;
+	int controlY = 21 * gridSize; // 4 tower types
+	int controlWidth = gridSize * 2;
+	int controlHeight = gridSize * 4;
+	if (x * gridSize >= controlX && x * gridSize < controlX + controlWidth &&
+		y * gridSize >= controlY && y * gridSize < controlY + 4 * controlHeight) {
+		return true; // Tower controls tile
 	}
 	return false; // Free tile
 }
