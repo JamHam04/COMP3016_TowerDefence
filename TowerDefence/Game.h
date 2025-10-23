@@ -41,6 +41,14 @@ private:
 	std::vector<std::unique_ptr<Tower>> towers; // Store Tower pointers
 	std::vector<std::unique_ptr<Wave>> waves;
 	std::vector<Projectile> projectiles; // Store Projectile instances
+
+	// Environmental effects
+	struct floodArea {
+		int x, y, w, h; 
+		int specialRound;
+		bool effectActive = false;
+	};
+	std::vector < floodArea > floodAreas;
 	
 
 	// Render

@@ -66,7 +66,11 @@ void Game::Setup() {
 	// Setup waves
 	waves.push_back(std::make_unique<Wave>(25, 2, 0)); // 10 smallEnemy, spawn every 25 ticks
 	waves.push_back(std::make_unique<Wave>(20, 3, 1));  // 5 mediumEnemy, spawn every 20 ticks
-	waves.push_back(std::make_unique<Wave>(15, 15, 0)); // 15 smallEnemy, spawn every 15 ticks
+	waves.push_back(std::make_unique<Wave>(15, 5, 0)); // 15 smallEnemy, spawn every 15 ticks
+	waves.push_back(std::make_unique<Wave>(15, 5, 0));
+
+	// Setup special waves
+	floodAreas.push_back({ 9, 6, 3, 5, 2, false });
 
 	// TO DOL: ADD MORE WAVES
 }
@@ -193,10 +197,24 @@ void Game::Render() {
 
 
 	// Drawn background
-	SDL_SetRenderDrawColor(renderer, 60, 120, 30, 255);
+	SDL_SetRenderDrawColor(renderer, 60, 130, 30, 255);
 	SDL_RenderClear(renderer);
 
 	// Draw random points?
+
+		// Draw flood areas
+	for (floodArea& flood : floodAreas) {
+		if (flood.effectActive) {
+			SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+			SDL_Rect floodRect = { flood.x * gridSize, flood.y * gridSize, flood.w * gridSize, flood.h * gridSize };
+			SDL_RenderFillRect(renderer, &floodRect);
+		}
+		else if (!flood.effectActive) {
+			SDL_SetRenderDrawColor(renderer, 60, 120, 30, 255);
+			SDL_Rect floodRect = { flood.x * gridSize, flood.y * gridSize, flood.w * gridSize, flood.h * gridSize };
+			SDL_RenderFillRect(renderer, &floodRect);
+		}
+	}
 
 
 	// Draw grid
@@ -237,7 +255,8 @@ void Game::Render() {
 		}
 	}
 
-	
+
+
 	
 	// Draw Tower
 	for (int t = 0; t < towers.size(); t++) {
@@ -496,16 +515,16 @@ void Game::Logic() {
 
 	// Enemy waves
 	if (waveStart) {
-
-	auto waveEnemies = waves[currentWave]->spawnEnemies();
-
-
-	for (auto& enemy : waveEnemies) {
-		enemies.push_back(std::move(enemy));
-	}
-	waveEnemies.clear();
+		if (!waves[currentWave]->waveComplete()) {
+			auto waveEnemies = waves[currentWave]->spawnEnemies();
+			for (auto& enemy : waveEnemies) {
+				enemies.push_back(std::move(enemy));
+			}
+			waveEnemies.clear();
+		}
+	
 	// If wave complete
-		if (waves[currentWave]->waveComplete()) {
+		if (waves[currentWave]->waveComplete() && enemies.empty()) {
 
 		
 
@@ -520,6 +539,21 @@ void Game::Logic() {
 			}
 		}
 	}
+
+	// Special Waves
+	for (floodArea& flood : floodAreas) {
+		// Activate flood area
+		if ((currentWave + 1) % flood.specialRound == 0) {
+			flood.effectActive = true;
+		}
+
+		//Deactivate after round ends
+		else {
+			flood.effectActive = false;
+		}
+	}
+
+
 
 
 	// Move enemies
@@ -568,7 +602,19 @@ void Game::Logic() {
 		towerType type = towers[t]->getTowerType();
 
 
+		bool towerDisabled = false;
+
+		// Diable tower if in flood area
+		for (floodArea& flood : floodAreas) {
+			if (flood.effectActive && towerX >= flood.x && towerX < flood.x + flood.w && towerY >= flood.y && towerY < flood.y + flood.h) {
+				towerDisabled = true;
+				break;
+			}
+		}
 		
+		if (towerDisabled) {
+			continue; // Skip fire
+		}
 
 		if (towers[t]->getFireTick() < towers[t]->getFireRate())
 			continue; // Skip fire 

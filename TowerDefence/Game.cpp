@@ -16,6 +16,8 @@ Game::Game() {
 	if (!font) {
 		SDL_Log("Failed to load font: %s", TTF_GetError());
 	}
+
+	
 }
 
 Game::~Game() {
