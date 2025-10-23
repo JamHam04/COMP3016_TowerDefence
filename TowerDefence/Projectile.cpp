@@ -1,6 +1,6 @@
 #include "Projectile.h"
 
-Projectile::Projectile(int x, int y, Direction dir, int s, int d) {
+Projectile::Projectile(int x, int y, Direction dir, int s, int d, int r, int dis) {
 	projX = x;
 	projY = y;
 	direction = dir;
@@ -8,6 +8,8 @@ Projectile::Projectile(int x, int y, Direction dir, int s, int d) {
 	damage = d;
 	moveTick = 0;
 	penetate = false;
+	range = r;
+	distance = dis;
 }
 
 void Projectile::move() {
@@ -19,6 +21,7 @@ void Projectile::move() {
 	}
 	else {
 		moveTick = 0;
+		distance++;
 		switch (direction) {
 		case UP:    projY--; break;
 		case RIGHT: projX++; break;
@@ -27,4 +30,8 @@ void Projectile::move() {
 		}
 	}
 	// Prevent going out map
+}
+
+bool Projectile::maxRange() {
+	return distance >= range;
 }

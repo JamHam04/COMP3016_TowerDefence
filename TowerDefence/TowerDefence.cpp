@@ -326,7 +326,7 @@ void Game::Render() {
 
 		// Upgrade Text
 		string upgradeDamageText = "1 - Damage " + to_string(towers[selectedTower]->getUpgrade1Level()) + "/" + to_string(towers[selectedTower]->getMaxUpgrade1Level());
-		string upgradeRangeText = "2 - Range" + to_string(towers[selectedTower]->getUpgrade2Level()) + " / " + to_string(towers[selectedTower]->getMaxUpgrade2Level());
+		string upgradeRangeText = "2 - Range " + to_string(towers[selectedTower]->getUpgrade2Level()) + " / " + to_string(towers[selectedTower]->getMaxUpgrade2Level());
 		SDL_Color textColor = {255, 0, 0, 255};
 		SDL_Surface* upgradeDamageSurface = TTF_RenderText_Blended(font, upgradeDamageText.c_str(), textColor);
 		SDL_Surface* upgradeRangeSurface = TTF_RenderText_Blended(font, upgradeRangeText.c_str(), textColor);
@@ -367,6 +367,16 @@ void Game::Render() {
 	SDL_Delay(50);
 };
 
+bool Game::isTileFree (int x, int y) {
+	// Check if tile has tower 
+	for (int t = 0; t < towers.size(); t++) {
+		if (towers[t]->getTowerX() == x && towers[t]->getTowerY() == y) {
+			return false; // Tower in tile
+		}
+	}
+	return true; // Tile is free
+}
+
 void Game::Input() {
 	SDL_Event event;
 	const Uint8* state = SDL_GetKeyboardState(NULL);
@@ -398,31 +408,34 @@ void Game::Input() {
 			case SDL_SCANCODE_Y:
 				waveStart = true;
 				break;
+
+			// Buy Towers
 			case SDL_SCANCODE_1:
-				if (money >= 50) {
+				if (money >= 50 && isTileFree(cursorX, cursorY)) {
 					towers.push_back(std::make_unique<basicTower>(cursorX, cursorY, cursorDir));
 					money -= 50;
 				}
 				break;
 
 			case SDL_SCANCODE_2:
-				if (money >= 100) {
+				if (money >= 100 && isTileFree(cursorX, cursorY)) {
 					towers.push_back(std::make_unique<longRangeTower>(cursorX, cursorY, cursorDir));
 					money -= 100;
 				}
 				break;
 			case SDL_SCANCODE_3:
-				if (money >= 200) {
+				if (money >= 200 && isTileFree(cursorX, cursorY)) {
 					towers.push_back(std::make_unique<heavyDamageTower>(cursorX, cursorY, cursorDir));
 					money -= 200;
 				}
 				break;
 			case SDL_SCANCODE_4:
-				if (money >= 300) {
+				if (money >= 300 && isTileFree(cursorX, cursorY)) {
 					towers.push_back(std::make_unique<fourWayTower>(cursorX, cursorY, cursorDir));
 					money -= 300;
 				}
 				break;
+			// Upgrade Menu
 			case SDL_SCANCODE_F:
 				// Upgrade tower at cursor position
 				for (int t = 0; t < towers.size(); t++) {
@@ -455,7 +468,7 @@ void Game::Input() {
 					break;
 				case SDL_SCANCODE_2: // Upgrade 2 selected
 					if (selectedTower >= 0 && selectedTower < towers.size()) {
-						towers[selectedTower]->upgradeRange();
+						towers[selectedTower]->upgradeMultiShot();
 						openUpgradeMenu = false;
 					}
 					break;
@@ -475,7 +488,7 @@ void Game::Input() {
 	/*if (!waveStart) {
 		cout << endl << "Press Y to start wave";
 	}*/
-	// Upgrade Tower
+
 
 }
 
@@ -595,7 +608,7 @@ void Game::Logic() {
 					case DOWN:  projY++; break;
 					case LEFT:  projX--; break;
 					}
-					projectiles.emplace_back(projX, projY, dir, 1, damage);
+					projectiles.emplace_back(projX, projY, dir, 1, damage, range, 0);
 					towers[t]->resetFireTick(); // Reset fire tick
 					break;
 
@@ -625,15 +638,23 @@ void Game::Logic() {
 			}
 		}
 
-		if (enemyHit) {
+		if (enemyHit || projectiles[p].maxRange()) {
 			projectiles.erase(projectiles.begin() + p); // Remove projectile
 			p--;
 		}
 	}
 
-
-
-	// Delete Tower
+	// Delete Tower - Add functions to Tower class
+	//for (int t = 0; t < towers.size(); t++) {
+	//	if (towers[t]->deleteTower()) {
+	//		// Refund money
+	//		money += towers[t]->refundTower();
+	//		// Remove from vector
+	//		towers.erase(towers.begin() + t);
+	//		t--;
+	//	}
+	//}
+	
 	// Remove from vector
 	// Refund cost
 }

@@ -31,41 +31,44 @@ bool basicTower::upgradeMultiShot() {
     return true;
 }
 
-bool longRangeTower::upgradePierce() {
+
+
+bool longRangeTower::upgradeRange() {
     if (upgrade1Level >= maxUpgrade1Level) return false;
 
     upgrade1Level++;
-    pierce = true; // Piece enemies
-    upgradeCost += 100;
-    return true;
-}
-
-bool longRangeTower::upgradeRange() {
-    if (upgrade2Level >= maxUpgrade2Level) return false;
-
-    upgrade2Level++;
     towerRange += 2; // Increase range
     upgradeCost += 100;
     return true;
 }
 
-bool heavyDamageTower::upgradeSlow() {
-    if (upgrade1Level >= maxUpgrade1Level) return false;
+bool longRangeTower::upgradePierce() {
+    if (upgrade2Level >= maxUpgrade2Level) return false;
 
-    upgrade1Level++;
-    slow = true; // Slow enemies
+    upgrade2Level++;
+    pierce = true; // Piece enemies
     upgradeCost += 100;
     return true;
 }
 
 bool heavyDamageTower::upgradeRange() {
-    if (upgrade2Level >= maxUpgrade2Level) return false;
+    if (upgrade1Level >= maxUpgrade1Level) return false;
 
-    upgrade2Level++;
+    upgrade1Level++;
     towerRange += 1; // Increase range
     upgradeCost += 100;
     return true;
 }
+
+bool heavyDamageTower::upgradeSlow() {
+    if (upgrade2Level >= maxUpgrade1Level) return false;
+
+    upgrade2Level++;
+    slow = true; // Slow enemies
+    upgradeCost += 100;
+    return true;
+}
+
 
 bool fourWayTower::upgradeFireRate() {
     if (upgrade1Level >= maxUpgrade1Level) return false;

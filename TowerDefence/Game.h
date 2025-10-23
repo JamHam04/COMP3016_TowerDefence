@@ -62,5 +62,6 @@ public:
 	void Render();
 
 	bool getGameOver() const { return gameOver; }
+	bool isTileFree(int x, int y);
 };
 

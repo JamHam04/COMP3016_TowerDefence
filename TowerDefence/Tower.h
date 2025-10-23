@@ -15,7 +15,7 @@ protected:
 	int upgrade1Level = 0;
 	int upgrade2Level = 0;
 	int maxUpgrade1Level = 3;
-	int maxUpgrade2Level = 3;
+	int maxUpgrade2Level = 1;
 	int upgradeCost = 100; // Initial upgrade cost
 
 	
@@ -56,7 +56,9 @@ public:
 	int getMaxUpgrade1Level() const { return maxUpgrade1Level; }
 	int getMaxUpgrade2Level() const { return maxUpgrade2Level; }
 
-
+	virtual bool upgradeRange() { return false; }
+	virtual bool upgradeDamage() { return false; }
+	virtual bool upgradeMultiShot() { return false; }
 
 };
 
@@ -67,7 +69,7 @@ class basicTower : public Tower {
 		basicTower(int x, int y, Direction dir) : Tower(x, y, 1, 5, dir, 20) {} // Damage 1, Range 5, Fire Rate 20 (Adjust)
 		virtual towerType getTowerType() const { return BASIC; }
 
-		bool upgradeDamage();     
+		bool upgradeDamage() override;
 		bool upgradeMultiShot();
 };
 
@@ -79,7 +81,7 @@ class longRangeTower : public Tower {
 		virtual towerType getTowerType() const { return LONG_RANGE; }
 		
 		bool upgradePierce();
-		bool upgradeRange();
+		bool upgradeRange() override;
 };
 
 class heavyDamageTower : public Tower {
@@ -90,7 +92,7 @@ class heavyDamageTower : public Tower {
 		virtual towerType getTowerType() const { return HEAVY_DAMAGE; }
 		
 		bool upgradeSlow();
-		bool upgradeRange();
+		bool upgradeRange() override;
 };
 
 class fourWayTower : public Tower {
@@ -99,5 +101,5 @@ class fourWayTower : public Tower {
 		virtual towerType getTowerType() const { return FOUR_WAY; }
 		
 		bool upgradeFireRate();
-		bool upgradeRange();
+		bool upgradeRange() override;
 };
