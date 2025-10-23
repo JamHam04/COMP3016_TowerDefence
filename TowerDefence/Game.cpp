@@ -28,3 +28,4 @@ Game::~Game() {
 	SDL_DestroyWindow(window);
 	SDL_Quit();
 };
+

@@ -33,7 +33,7 @@ private:
 	bool pathMove;
 
 	// Input
-	int cursorX, cursorY;
+	int cursorX = 10, cursorY = 10;
 	Direction cursorDir;
 
 	// Enemy vectors
@@ -68,8 +68,11 @@ public:
 	void Input();
 	void createPath();
 	void Render();
-
+	void drawHUD();
+	void drawTowerControls();
+	void drawUpgradeMenu();
 	bool getGameOver() const { return gameOver; }
 	bool isTileFree(int x, int y);
+	bool isTileHUD(int x, int y);
 };
 

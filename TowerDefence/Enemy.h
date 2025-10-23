@@ -9,6 +9,7 @@ private:
 	int speed;
 	int moveTick;
 	int x, y; //Coordinates
+	bool enemyDamaged;
 public:
 
 	
@@ -21,6 +22,10 @@ public:
 
 	// Enemy Damaged
 	void hit(int damage);
+	bool enemyHitEffect() { return enemyDamaged; }
+	void resetHitEffect() { enemyDamaged = false; }
+
+
 	int getX() const { return x; }
 	int getY() const { return y; }
 	int getPathPosition() const { return pathPosition; }

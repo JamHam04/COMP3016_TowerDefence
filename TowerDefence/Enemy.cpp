@@ -2,9 +2,7 @@
 
 Enemy::Enemy(int h, int s)
     : health(h), pathPosition(0), speed(s), moveTick(0), x(0), y(0)
-{
-    // Enemy starts at beginning of path
-}
+{}
 
 void Enemy::move(const int pathX[], const int pathY[], int pathLength)
 {
@@ -29,4 +27,5 @@ void Enemy::hit(int damage)
 {
     health -= damage;
     if (health < 0) health = 0;
+	enemyDamaged = true;
 }

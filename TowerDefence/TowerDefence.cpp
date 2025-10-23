@@ -10,7 +10,7 @@
 using namespace std;
 
 void Game::createPath() {
-	int currentCol = 10; // Where path will start 
+	int currentCol = 15; // Where path will start 
 	int currentPath = 0;
 
 	int previousCol = currentCol;
@@ -23,7 +23,7 @@ void Game::createPath() {
 
 		// Move left or right
 		if (currentRow == 5) {
-			currentCol += 3; // Move 3 right
+			currentCol -= 3; // Move 3 left
 		}
 
 		if (currentRow == 12) {
@@ -68,9 +68,12 @@ void Game::Setup() {
 	waves.push_back(std::make_unique<Wave>(20, 2, 1));  // 5 mediumEnemy, spawn every 20 ticks
 	waves.push_back(std::make_unique<Wave>(15, 3, 2)); // 15 smallEnemy, spawn every 15 ticks
 	waves.push_back(std::make_unique<Wave>(15, 5, 0));
+	waves.push_back(std::make_unique<Wave>(15, 5, 0));
 
 	// Setup special waves
-	floodAreas.push_back({ 9, 6, 3, 5, 2, false });
+	floodAreas.push_back({ 13, 6, 3, 5, 2, false });
+	floodAreas.push_back({ 12, 15, 6, 4, 2, false });
+	floodAreas.push_back({ 3, 12, 2, 2, 2, false });
 
 	// TO DOL: ADD MORE WAVES
 }
@@ -191,11 +194,12 @@ void drawTower(SDL_Renderer* renderer, int towerX, int towerY, int gridSize, Dir
 	
 }
 
-void drawEnemy(SDL_Renderer* renderer, int x, int y, int gridSize, enemyType type) {
+void drawEnemy(SDL_Renderer* renderer, int x, int y, int gridSize, Enemy* enemy, enemyType type) {
 	
 	int circleX = x * gridSize + 12; // Circle center X pixel (tileX * tileSize + tileSize/2)
 	int circleY = y * gridSize + 12; // Circle center Y pixel (tileX * tileSize + tileSize/2)
 	int radius = 0; // Circle size
+	// Switch color based on enemy type
 	switch (type) {
 	case SMALL:
 		SDL_SetRenderDrawColor(renderer, 255, 150, 150, 255);
@@ -211,10 +215,13 @@ void drawEnemy(SDL_Renderer* renderer, int x, int y, int gridSize, enemyType typ
 		radius = 10;
 	}
 
-
+	// Enemy damaged effect
+	if (enemy->enemyHitEffect()) {
+		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Flash white
+	}
 	
 
-	// Switch color based on enemy type:
+	
 
 
 	// Loop through tile and draw pixel within radius
@@ -229,6 +236,122 @@ void drawEnemy(SDL_Renderer* renderer, int x, int y, int gridSize, enemyType typ
 
 
 	
+}
+
+void Game::drawTowerControls() {
+
+
+
+	int controlX = 10;
+	int controlY = gridSize * 4; // 4 tower types
+
+	SDL_Color textColor = { 255, 255, 255, 255 };
+
+	// For each tower type
+	for (int i = 0; i < 4; ++i) {
+		
+	}
+}
+
+void Game::drawHUD() {
+	// Example positions
+	int hudX = 5;
+	int hudY = 5;
+	int hudWidth = gridSize * 8;
+	int hudHeight = gridSize * 4;
+
+	SDL_Color textColor = { 255, 255, 255, 255 };
+
+	// Draw HUD background
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 150);
+	SDL_Rect hudRect = { hudX - 5, hudY - 5, hudWidth, hudHeight};
+	SDL_RenderFillRect(renderer, &hudRect);
+
+	// Health
+	std::string healthText = "Base Health: " + std::to_string(baseHealth);
+	SDL_Surface* healthSurface = TTF_RenderText_Blended(font, healthText.c_str(), textColor);
+	SDL_Texture* healthTexture = SDL_CreateTextureFromSurface(renderer, healthSurface);
+	int w, h;
+	SDL_QueryTexture(healthTexture, NULL, NULL, &w, &h);
+	SDL_Rect healthRect = { hudX, hudY, w, h };
+	SDL_RenderCopy(renderer, healthTexture, NULL, &healthRect);
+	SDL_FreeSurface(healthSurface);
+	SDL_DestroyTexture(healthTexture);
+
+	// Money
+	std::string moneyText = "Money: " + std::to_string(money);
+	SDL_Surface* moneySurface = TTF_RenderText_Blended(font, moneyText.c_str(), textColor);
+	SDL_Texture* moneyTexture = SDL_CreateTextureFromSurface(renderer, moneySurface);
+	SDL_QueryTexture(moneyTexture, NULL, NULL, &w, &h);
+	SDL_Rect moneyRect = { hudX, hudY + 20, w, h };
+	SDL_RenderCopy(renderer, moneyTexture, NULL, &moneyRect);
+	SDL_FreeSurface(moneySurface);
+	SDL_DestroyTexture(moneyTexture);
+
+	// Wave number
+	std::string waveText = "Wave: " + std::to_string(currentWave + 1) + " / " + std::to_string(waves.size());
+	SDL_Surface* waveSurface = TTF_RenderText_Blended(font, waveText.c_str(), textColor);
+	SDL_Texture* waveTexture = SDL_CreateTextureFromSurface(renderer, waveSurface);
+	SDL_QueryTexture(waveTexture, NULL, NULL, &w, &h);
+	SDL_Rect waveRect = { hudX, hudY + 40, w, h };
+	SDL_RenderCopy(renderer, waveTexture, NULL, &waveRect);
+	SDL_FreeSurface(waveSurface);
+	SDL_DestroyTexture(waveTexture);
+
+	// Enemies left
+	std::string enemiesLeftText = "Enemies Left: " + std::to_string(enemies.size());
+	SDL_Surface* enemiesSurface = TTF_RenderText_Blended(font, enemiesLeftText.c_str(), textColor);
+	SDL_Texture* enemiesTexture = SDL_CreateTextureFromSurface(renderer, enemiesSurface);
+	SDL_QueryTexture(enemiesTexture, NULL, NULL, &w, &h);
+	SDL_Rect enemiesRect = { hudX, hudY + 60, w, h };
+	SDL_RenderCopy(renderer, enemiesTexture, NULL, &enemiesRect);
+	SDL_FreeSurface(enemiesSurface);
+	SDL_DestroyTexture(enemiesTexture);
+
+
+}
+
+void Game::drawUpgradeMenu() {
+	int menyX = cursorX * gridSize;
+	int menyY = cursorY * gridSize;
+
+	// Draw upgrade menu background
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200);
+	SDL_Rect upgradeMenuRect = { menyX, menyY, 160, 110 };
+	SDL_RenderFillRect(renderer, &upgradeMenuRect);
+
+	// Draw upgrade options 
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+	SDL_Rect upgrade1Rect = { menyX + 10, menyY + 10, 140, 40 };
+	SDL_Rect upgrade2Rect = { menyX + 10, menyY + 60, 140, 40 };
+	SDL_RenderFillRect(renderer, &upgrade1Rect);
+	SDL_RenderFillRect(renderer, &upgrade2Rect);
+
+	// Upgrade Text
+	string upgradeDamageText = "1 - Damage " + to_string(towers[selectedTower]->getUpgrade1Level()) + "/" + to_string(towers[selectedTower]->getMaxUpgrade1Level());
+	string upgradeRangeText = "2 - Range " + to_string(towers[selectedTower]->getUpgrade2Level()) + " / " + to_string(towers[selectedTower]->getMaxUpgrade2Level());
+	SDL_Color textColor = { 255, 0, 0, 255 };
+	SDL_Surface* upgradeDamageSurface = TTF_RenderText_Blended(font, upgradeDamageText.c_str(), textColor);
+	SDL_Surface* upgradeRangeSurface = TTF_RenderText_Blended(font, upgradeRangeText.c_str(), textColor);
+
+	SDL_Texture* upgradeDamageTexture = SDL_CreateTextureFromSurface(renderer, upgradeDamageSurface);
+	SDL_Texture* upgradeRangeTexture = SDL_CreateTextureFromSurface(renderer, upgradeRangeSurface);
+
+	int upgradeDamageW, upgradeDamageH;
+	int upgradeRangeW, upgradeRangeH;
+	SDL_QueryTexture(upgradeDamageTexture, NULL, NULL, &upgradeDamageW, &upgradeDamageH);
+	SDL_QueryTexture(upgradeRangeTexture, NULL, NULL, &upgradeRangeW, &upgradeRangeH);
+
+	SDL_Rect upgradeDamageTextRect = { menyX + 15, menyY + 20,upgradeDamageW, upgradeDamageH };
+	SDL_Rect upgradeRangeTextRect = { menyX + 15, menyY + 70, upgradeRangeW, upgradeRangeH };
+
+	SDL_RenderCopy(renderer, upgradeDamageTexture, NULL, &upgradeDamageTextRect);
+	SDL_RenderCopy(renderer, upgradeRangeTexture, NULL, &upgradeRangeTextRect);
+
+	SDL_FreeSurface(upgradeDamageSurface);
+	SDL_FreeSurface(upgradeRangeSurface);
+	SDL_DestroyTexture(upgradeDamageTexture);
+	SDL_DestroyTexture(upgradeRangeTexture);
 }
 
 void Game::Render() {
@@ -276,7 +399,8 @@ void Game::Render() {
 
 	// Draw enemies
 	for (int enemy = 0; enemy < enemies.size(); enemy++) {
-		drawEnemy(renderer, enemies[enemy]->getX(), enemies[enemy]->getY(), gridSize, enemies[enemy]->getEnemyType());
+		drawEnemy(renderer, enemies[enemy]->getX(), enemies[enemy]->getY(), gridSize, enemies[enemy].get(), enemies[enemy]->getEnemyType());
+		enemies[enemy]->resetHitEffect();
 	}
 
 
@@ -352,46 +476,7 @@ void Game::Render() {
 
 	// Upgrade Menu
 	if (openUpgradeMenu) {
-		int menyX = cursorX * gridSize;
-		int menyY = cursorY * gridSize;
-
-		// Draw upgrade menu background
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200); 
-		SDL_Rect upgradeMenuRect = { menyX, menyY, 160, 110 };
-		SDL_RenderFillRect(renderer, &upgradeMenuRect);
-		
-		// Draw upgrade options 
-		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-		SDL_Rect upgrade1Rect = { menyX + 10, menyY + 10, 140, 40 };
-		SDL_Rect upgrade2Rect = { menyX + 10, menyY + 60, 140, 40 };
-		SDL_RenderFillRect(renderer, &upgrade1Rect);
-		SDL_RenderFillRect(renderer, &upgrade2Rect);
-
-		// Upgrade Text
-		string upgradeDamageText = "1 - Damage " + to_string(towers[selectedTower]->getUpgrade1Level()) + "/" + to_string(towers[selectedTower]->getMaxUpgrade1Level());
-		string upgradeRangeText = "2 - Range " + to_string(towers[selectedTower]->getUpgrade2Level()) + " / " + to_string(towers[selectedTower]->getMaxUpgrade2Level());
-		SDL_Color textColor = {255, 0, 0, 255};
-		SDL_Surface* upgradeDamageSurface = TTF_RenderText_Blended(font, upgradeDamageText.c_str(), textColor);
-		SDL_Surface* upgradeRangeSurface = TTF_RenderText_Blended(font, upgradeRangeText.c_str(), textColor);
-
-		SDL_Texture* upgradeDamageTexture = SDL_CreateTextureFromSurface(renderer, upgradeDamageSurface);
-		SDL_Texture* upgradeRangeTexture = SDL_CreateTextureFromSurface(renderer, upgradeRangeSurface);
-
-		int upgradeDamageW, upgradeDamageH;
-		int upgradeRangeW, upgradeRangeH;
-		SDL_QueryTexture(upgradeDamageTexture, NULL, NULL, &upgradeDamageW, &upgradeDamageH);
-		SDL_QueryTexture(upgradeRangeTexture, NULL, NULL, &upgradeRangeW, &upgradeRangeH);
-
-		SDL_Rect upgradeDamageTextRect = {menyX + 15, menyY + 20,upgradeDamageW, upgradeDamageH };
-		SDL_Rect upgradeRangeTextRect = {menyX + 15, menyY + 70, upgradeRangeW, upgradeRangeH};
-
-		SDL_RenderCopy(renderer, upgradeDamageTexture, NULL, &upgradeDamageTextRect);
-		SDL_RenderCopy(renderer, upgradeRangeTexture, NULL, &upgradeRangeTextRect);
-
-		SDL_FreeSurface(upgradeDamageSurface);
-		SDL_FreeSurface(upgradeRangeSurface);
-		SDL_DestroyTexture(upgradeDamageTexture);
-		SDL_DestroyTexture(upgradeRangeTexture);
+		drawUpgradeMenu();
 	}
 
 	// Print HUD (CONVERT TO SDL)
@@ -405,10 +490,14 @@ void Game::Render() {
 	//cout << "Money: " << money;
 	//// Print Wave Number
 
-
+	drawHUD();
+	drawTowerControls();
 	SDL_RenderPresent(renderer);
 	SDL_Delay(50);
 };
+
+
+
 
 bool Game::isTileFree (int x, int y) {
 	// Check if tile has tower 
@@ -417,7 +506,21 @@ bool Game::isTileFree (int x, int y) {
 			return false; // Tower in tile
 		}
 	}
+
 	return true; // Tile is free
+}
+
+bool Game::isTileHUD (int x, int y) {
+	int hudX = 5;
+	int hudY = 5;
+	int hudWidth = gridSize * 6;
+	int hudHeight = gridSize * 4;
+	// Check if tile is inside HUD area
+	if (x * gridSize >= hudX - 5 && x * gridSize < hudX - 5 + hudWidth &&
+		y * gridSize >= hudY - 5 && y * gridSize < hudY - 5 + hudHeight) {
+		return true; // HUD tile
+	}
+	return false; // Free tile
 }
 
 void Game::Input() {
@@ -437,16 +540,20 @@ void Game::Input() {
 				cursorDir = static_cast<Direction>((cursorDir + 3) % 4);
 				break;
 			case SDL_SCANCODE_W:
-				cursorY--;
+				if (cursorY > 0 && !isTileHUD(cursorX, cursorY - 1))
+					cursorY--;
 				break;
 			case SDL_SCANCODE_S:
-				cursorY++;
+				if (cursorY < height - 1 && !isTileHUD(cursorX, cursorY + 1))
+					cursorY++;
 				break;
 			case SDL_SCANCODE_A:
-				cursorX--;
+				if (cursorX > 0 && !isTileHUD(cursorX - 1, cursorY))
+					cursorX--;
 				break;
 			case SDL_SCANCODE_D:
-				cursorX++;
+				if (cursorX < width - 1 && !isTileHUD(cursorX + 1, cursorY))
+					cursorX++;
 				break;
 			case SDL_SCANCODE_Y:
 				waveStart = true;
@@ -583,6 +690,7 @@ void Game::Logic() {
 	// Move enemies
 	for (int i = 0; i < enemies.size(); ++i) {
 		enemies[i]->move(pathX, pathY, pathLength); // Loop through vector and move each
+		enemies[i]->enemyHitEffect();
 
 		if (enemies[i]->getPathPosition() >= pathLength) {
 			// Decrease player health
@@ -639,6 +747,8 @@ void Game::Logic() {
 		if (towerDisabled) {
 			continue; // Skip fire
 		}
+
+
 
 		if (towers[t]->getFireTick() < towers[t]->getFireRate())
 			continue; // Skip fire 
