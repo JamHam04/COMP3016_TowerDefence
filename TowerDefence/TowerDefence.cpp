@@ -64,9 +64,9 @@ void Game::Setup() {
 	createPath();
 
 	// Setup waves
-	waves.push_back(std::make_unique<Wave>(25, 2, 0)); // 10 smallEnemy, spawn every 25 ticks
-	waves.push_back(std::make_unique<Wave>(20, 3, 1));  // 5 mediumEnemy, spawn every 20 ticks
-	waves.push_back(std::make_unique<Wave>(15, 5, 0)); // 15 smallEnemy, spawn every 15 ticks
+	waves.push_back(std::make_unique<Wave>(25, 5, 0)); // 10 smallEnemy, spawn every 25 ticks
+	waves.push_back(std::make_unique<Wave>(20, 2, 1));  // 5 mediumEnemy, spawn every 20 ticks
+	waves.push_back(std::make_unique<Wave>(15, 3, 2)); // 15 smallEnemy, spawn every 15 ticks
 	waves.push_back(std::make_unique<Wave>(15, 5, 0));
 
 	// Setup special waves
@@ -191,6 +191,46 @@ void drawTower(SDL_Renderer* renderer, int towerX, int towerY, int gridSize, Dir
 	
 }
 
+void drawEnemy(SDL_Renderer* renderer, int x, int y, int gridSize, enemyType type) {
+	
+	int circleX = x * gridSize + 12; // Circle center X pixel (tileX * tileSize + tileSize/2)
+	int circleY = y * gridSize + 12; // Circle center Y pixel (tileX * tileSize + tileSize/2)
+	int radius = 0; // Circle size
+	switch (type) {
+	case SMALL:
+		SDL_SetRenderDrawColor(renderer, 255, 150, 150, 255);
+		radius = 6;
+		break;
+	case MEDIUM:
+		SDL_SetRenderDrawColor(renderer, 255, 150, 0, 255);
+		
+		radius = 8;
+		break;
+	case LARGE:
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+		radius = 10;
+	}
+
+
+	
+
+	// Switch color based on enemy type:
+
+
+	// Loop through tile and draw pixel within radius
+	for (int yOffset = -radius; yOffset <= radius; yOffset++) {
+		for (int xOffset = -radius; xOffset <= radius; xOffset++) {
+			// If within radius 
+			if (xOffset * xOffset + yOffset * yOffset <= radius * radius) {
+				SDL_RenderDrawPoint(renderer, circleX + xOffset, circleY + yOffset);
+			}
+		}
+	}
+
+
+	
+}
+
 void Game::Render() {
 
 	
@@ -235,24 +275,8 @@ void Game::Render() {
 	
 
 	// Draw enemies
-	SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
 	for (int enemy = 0; enemy < enemies.size(); enemy++) {
-		int circleX = enemies[enemy]->getX() * gridSize + 12; // Circle center X pixel (tileX * tileSize + tileSize/2)
-		int circleY = enemies[enemy]->getY() * gridSize + 12; // Circle center Y pixel (tileX * tileSize + tileSize/2)
-		int radius = 10; // Circle size
-
-		// Switch color based on enemy type:
-
-
-		// Loop through tile and draw pixel within radius
-		for (int yOffset = -radius; yOffset <= radius; yOffset++) {
-			for (int xOffset = -radius; xOffset <= radius; xOffset++) {
-				// If within radius 
-				if (xOffset * xOffset + yOffset * yOffset <= radius * radius) {
-					SDL_RenderDrawPoint(renderer, circleX + xOffset, circleY + yOffset);
-				}
-			}
-		}
+		drawEnemy(renderer, enemies[enemy]->getX(), enemies[enemy]->getY(), gridSize, enemies[enemy]->getEnemyType());
 	}
 
 

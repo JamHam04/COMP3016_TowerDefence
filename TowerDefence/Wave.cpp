@@ -16,7 +16,12 @@ std::vector<std::unique_ptr<Enemy>> Wave::spawnEnemies() {
 		case 1:
 			waveEnemies.push_back(std::make_unique<mediumEnemy>());
 			break;
-		}
+
+		case 2:
+			waveEnemies.push_back(std::make_unique<largeEnemy>());
+			break;
+		
+	}
 		enemiesSpawned++; // Increase enemy spawn 
 		spawnTick = 0; // Reset spawn tick
 	}
