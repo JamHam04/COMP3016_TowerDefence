@@ -793,8 +793,47 @@ void Game::Logic() {
 			continue; // Skip fire 
 
 		if (type == FOUR_WAY) {
-			// Able to attack in all 4 direction independently
-			
+			// Able to attack in all 4 direction independently:
+			fourWayTower* fwTower = static_cast<fourWayTower*>(towers[t].get()); // Get pointer to fourWayTower
+			fwTower->incrementFireTicks();
+
+			for (int e = 0; e < enemies.size(); e++) { // Loop throguh enemies
+				int enemyX = enemies[e]->getX();
+				int enemyY = enemies[e]->getY();
+
+				for (int d = 0; d < 4; d++) {
+					Direction attackDir = static_cast<Direction>(d); // Get each direction individually 
+					bool inRange = false;
+					switch (attackDir) {
+					case UP:
+						if (enemyX == towerX && enemyY < towerY && enemyY >= towerY - range) inRange = true;
+						break;
+					case RIGHT:
+						if (enemyY == towerY && enemyX > towerX && enemyX <= towerX + range) inRange = true;
+						break;
+					case DOWN:
+						if (enemyX == towerX && enemyY > towerY && enemyY <= towerY + range) inRange = true;
+						break;
+					case LEFT:
+						if (enemyY == towerY && enemyX < towerX && enemyX >= towerX - range) inRange = true;
+						break;
+					}
+					// If enemy in range
+					if (inRange && fwTower->canFire(attackDir)) {
+						int projX = towerX;
+						int projY = towerY;
+						switch (attackDir) {
+						case UP:    projY--; break;
+						case RIGHT: projX++; break;
+						case DOWN:  projY++; break;
+						case LEFT:  projX--; break;
+						}
+						projectiles.emplace_back(projX, projY, attackDir, 1, damage, range, 0);
+						fwTower->resetFireTick(attackDir); // Reset fire tick for specific direction
+					}
+				}
+			}
+		
 		}
 		else {
 			for (int e = 0; e < enemies.size(); e++) { // Loop throguh enemies

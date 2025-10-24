@@ -96,10 +96,24 @@ class heavyDamageTower : public Tower {
 };
 
 class fourWayTower : public Tower {
+	int fireTicks[4] = { 0,0,0,0 }; // cooldown for each direction
 	public:
 		fourWayTower(int x, int y, Direction dir) : Tower(x, y, 1, 4, dir, 10) {} // Damage 1, Range 4, shoots in all directions
 		virtual towerType getTowerType() const { return FOUR_WAY; }
 		
 		bool upgradeFireRate();
 		bool upgradeRange() override;
+
+		void incrementFireTicks() {
+			for (int i = 0; i < 4; i++) // all four direcxtions
+				fireTicks[i]++;
+		}
+
+		bool canFire(Direction dir) const {
+			return fireTicks[dir] >= fireRate; 
+		}
+
+		void resetFireTick(Direction dir) {
+			fireTicks[dir] = 0;
+		}
 };
