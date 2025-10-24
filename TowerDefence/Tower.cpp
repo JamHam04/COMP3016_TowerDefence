@@ -27,7 +27,6 @@ bool basicTower::upgradeMultiShot() {
 
     upgrade2Level++;
 	multiShot = true; // Shott multiple projectiles
-    upgradeCost += 500;
     return true;
 }
 
@@ -38,7 +37,7 @@ bool longRangeTower::upgradeRange() {
 
     upgrade1Level++;
     towerRange += 2; // Increase range
-    upgradeCost += 100;
+    upgradeCost += 400;
     return true;
 }
 
@@ -47,7 +46,6 @@ bool longRangeTower::upgradePierce() {
 
     upgrade2Level++;
     pierce = true; // Piece enemies
-    upgradeCost += 100;
     return true;
 }
 
@@ -56,7 +54,7 @@ bool heavyDamageTower::upgradeRange() {
 
     upgrade1Level++;
     towerRange += 1; // Increase range
-    upgradeCost += 100;
+    upgradeCost += 750;
     return true;
 }
 
@@ -65,7 +63,6 @@ bool heavyDamageTower::upgradeSlow() {
 
     upgrade2Level++;
     slow = true; // Slow enemies
-    upgradeCost += 100;
     return true;
 }
 
@@ -75,7 +72,7 @@ bool fourWayTower::upgradeFireRate() {
 
     upgrade1Level++;
 	fireRate += 2; // Increase fire rate
-    upgradeCost += 100;
+    upgradeCost += 1000;
     return true;
 }
 
@@ -84,6 +81,5 @@ bool fourWayTower::upgradeRange() {
 
     upgrade2Level++;
     towerRange += 1; // Increase range
-    upgradeCost += 100;
     return true;
 }

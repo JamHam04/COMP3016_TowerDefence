@@ -63,7 +63,7 @@ void Game::Setup() {
 	// Set Variables
 	createPath();
 
-	// Setup waves
+	// Setup waves (Change to file load?)
 	waves.push_back(std::make_unique<Wave>(25, 5, 0)); // 10 smallEnemy, spawn every 25 ticks
 	waves.push_back(std::make_unique<Wave>(20, 2, 1));  // 5 mediumEnemy, spawn every 20 ticks
 	waves.push_back(std::make_unique<Wave>(15, 3, 2)); // 15 smallEnemy, spawn every 15 ticks
@@ -350,6 +350,7 @@ void Game::drawHUD() {
 	SDL_FreeSurface(enemiesSurface);
 	SDL_DestroyTexture(enemiesTexture);
 
+	// Wave start prompt
 	if (!waveStart) {
 		std::string startText = "Press Y to start wave";
 		SDL_Color textColor = { 255, 160, 0, 255 };
@@ -407,14 +408,14 @@ void Game::drawUpgradeMenu() {
 	SDL_DestroyTexture(upgradeDamageTexture);
 	SDL_DestroyTexture(upgradeRangeTexture);
 
-	// cost
+	// Upgrade Costs
 	int upgradeCost = towers[selectedTower]->getUpgradeCost();
 	string upgradeCostText1 = "Cost: $" + to_string(upgradeCost);
 	string upgradeCostText2 = "Cost: $" + to_string(upgradeCost);
 
 	SDL_Color upgradeCostColor = { 0, 150, 0, 255 };
 	if (money < upgradeCost) {
-		upgradeCostColor = { 255, 0, 0, 255 };
+		upgradeCostColor = { 255, 0, 0, 255 }; // Not enough money
 	}
 
 	
@@ -430,9 +431,7 @@ void Game::drawUpgradeMenu() {
 	SDL_Rect upgradeCostRect1 = { menyX + 90, menyY + 35, upgradeCostW1, upgradeCostH1 };
 	SDL_Rect upgradeCostRect2 = { menyX + 90, menyY + 85, upgradeCostW2, upgradeCostH2 };
 
-
-		
-	
+	// Only draw cost if not maxed
 	if (towers[selectedTower]->getUpgrade1Level() != towers[selectedTower]->getMaxUpgrade1Level()) {
 		SDL_RenderCopy(renderer, upgradeCostTexture1, NULL, &upgradeCostRect1);
 	}
@@ -682,32 +681,40 @@ void Game::Input() {
 				break;
 
 				// Buy Towers
-			case SDL_SCANCODE_1:
-				if (money >= 50 && isTileFree(cursorX, cursorY)) {
-					towers.push_back(std::make_unique<basicTower>(cursorX, cursorY, cursorDir));
-					money -= 50;
+			case SDL_SCANCODE_1: {
+				std::unique_ptr<basicTower> tower = std::make_unique<basicTower>(cursorX, cursorY, cursorDir);
+				int cost = tower->getTowerCost();
+				if (money >= cost && isTileFree(cursorX, cursorY)) {
+					money -= cost;
+					towers.push_back(std::move(tower));
 				}
 				break;
-
-			case SDL_SCANCODE_2:
+			}
+			case SDL_SCANCODE_2: {
+				std::unique_ptr<longRangeTower> tower = std::make_unique<longRangeTower>(cursorX, cursorY, cursorDir);
 				if (money >= 100 && isTileFree(cursorX, cursorY)) {
-					towers.push_back(std::make_unique<longRangeTower>(cursorX, cursorY, cursorDir));
+					towers.push_back(std::move(tower));
 					money -= 100;
 				}
 				break;
-			case SDL_SCANCODE_3:
+			}
+			case SDL_SCANCODE_3: {
+				std::unique_ptr<heavyDamageTower> tower = std::make_unique<heavyDamageTower>(cursorX, cursorY, cursorDir);
 				if (money >= 200 && isTileFree(cursorX, cursorY)) {
-					towers.push_back(std::make_unique<heavyDamageTower>(cursorX, cursorY, cursorDir));
+					towers.push_back(std::move(tower));
 					money -= 200;
 				}
 				break;
-			case SDL_SCANCODE_4:
+			}
+			case SDL_SCANCODE_4: {
+				std::unique_ptr<fourWayTower> tower = std::make_unique<fourWayTower>(cursorX, cursorY, cursorDir);
 				if (money >= 300 && isTileFree(cursorX, cursorY)) {
-					towers.push_back(std::make_unique<fourWayTower>(cursorX, cursorY, cursorDir));
+					towers.push_back(std::move(tower));
 					money -= 300;
 				}
 				break;
-				// Upgrade Menu
+			}
+							   // Upgrade Menu
 			case SDL_SCANCODE_F:
 				// Upgrade tower at cursor position
 				for (int t = 0; t < towers.size(); t++) {
@@ -726,7 +733,13 @@ void Game::Input() {
 				}
 				break;
 
-
+			case SDL_SCANCODE_0: // Close upgrade menu
+				for (int t = 0; t < towers.size(); t++) {
+					if (towers[t]->getTowerX() == cursorX && towers[t]->getTowerY() == cursorY) {
+						towers[t]->setTowerDelete();
+					}
+					break;
+				}
 			}
 
 			// buy upgrades
@@ -981,16 +994,16 @@ void Game::Logic() {
 		}
 	}
 
-	// Delete Tower - Add functions to Tower class
-	//for (int t = 0; t < towers.size(); t++) {
-	//	if (towers[t]->deleteTower()) {
-	//		// Refund money
-	//		money += towers[t]->refundTower();
-	//		// Remove from vector
-	//		towers.erase(towers.begin() + t);
-	//		t--;
-	//	}
-	//}
+	 //Delete Tower - Add functions to Tower class
+	for (int t = 0; t < towers.size(); t++) {
+		if (towers[t]->deleteTower()) {
+			// Refund money
+			money += towers[t]->refundTower();
+			// Remove from vector
+			towers.erase(towers.begin() + t);
+			t--;
+		}
+	}
 	
 	// Remove from vector
 	// Refund cost

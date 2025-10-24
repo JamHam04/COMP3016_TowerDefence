@@ -13,6 +13,7 @@ protected:
 	int towerRange;
 	int fireRate; 
 	int fireTick;
+	int towerCost;
 
 	string upgrade1Name;
 	string upgrade2Name;
@@ -21,7 +22,7 @@ protected:
 	int maxUpgrade1Level = 3;
 	int maxUpgrade2Level = 1;
 	int upgradeCost = 100; // Initial upgrade cost
-
+	bool towerDelete = false;;
 	
 	
 
@@ -63,18 +64,30 @@ public:
 	int getMaxUpgrade2Level() const { return maxUpgrade2Level; }
 	virtual bool upgrade1() { return false; }
 	virtual bool upgrade2() { return false; }
+	int getTowerCost() const { return towerCost; }
+
 
 	virtual bool upgradeRange() { return false; }
 	virtual bool upgradeDamage() { return false; }
 	virtual bool upgradeMultiShot() { return false; }
+
+	void setTowerDelete() { towerDelete = true; }
+	bool deleteTower() { return towerDelete; }
+
+
+	int refundTower() {
+		return towerCost;
+	}
 
 };
 
 class basicTower : public Tower {
 	public:
 		bool multiShot = false; // Upgrade 3
+		
 
 		basicTower(int x, int y, Direction dir) : Tower(x, y, 1, 5, dir, 20) {
+			towerCost = 50;
 			upgrade1Name = "Damage";
 			upgrade2Name = "MultiShot";
 		} // Damage 1, Range 5, Fire Rate 20 (Adjust)
@@ -94,6 +107,7 @@ class longRangeTower : public Tower {
 		bool pierce = false;
 
 		longRangeTower(int x, int y, Direction dir) : Tower(x, y, 1, 10, dir, 10) {
+			towerCost = 200;
 			upgrade1Name = "Range";
 			upgrade2Name = "Pierce";
 		} // Damage 1, Range 10
@@ -111,8 +125,9 @@ class heavyDamageTower : public Tower {
 		bool slow = false;
 
 		heavyDamageTower(int x, int y, Direction dir) : Tower(x, y, 3, 3, dir, 10) {
-			upgrade1Name = "Slow";
-			upgrade2Name = "Range";
+			towerCost = 350;
+			upgrade1Name = "Range";
+			upgrade2Name = "Slow";
 		} // Damage 3, Range 3
 		virtual towerType getTowerType() const { return HEAVY_DAMAGE; }
 		
@@ -128,6 +143,7 @@ class fourWayTower : public Tower {
 	int fireTicks[4] = { 0,0,0,0 }; // cooldown for each direction
 	public:
 		fourWayTower(int x, int y, Direction dir) : Tower(x, y, 1, 4, dir, 10) {
+			towerCost = 500;
 			upgrade1Name = "Fire Rate";
 			upgrade2Name = "Range";
 		} // Damage 1, Range 4, shoots in all directions
