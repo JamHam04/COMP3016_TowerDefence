@@ -25,6 +25,7 @@ private:
 	int currentWave = 0;
 	bool openUpgradeMenu = false;
 	int selectedTower = 0;
+	bool baseDamaged = false;
 	
 
 	// Path coordinates
@@ -37,10 +38,10 @@ private:
 	int cursorX = 10, cursorY = 10;
 	Direction cursorDir;
 
-	// Enemy vectors
+	// Game vectors
 	std::vector<std::unique_ptr<Enemy>> enemies; // Store Enemy pointers
 	std::vector<std::unique_ptr<Tower>> towers; // Store Tower pointers
-	std::vector<std::unique_ptr<Wave>> waves;
+	std::vector<std::unique_ptr<Wave>> waves; // Store Wave pointers
 	std::vector<Projectile> projectiles; // Store Projectile instances
 
 	// Environmental effects
@@ -56,11 +57,17 @@ private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	TTF_Font* font;
+	TTF_Font* fontSmall;
 
 public:
 	// Render
 	Game();
 	~Game();
+
+	// Base damged 
+	bool baseDamageEffect() { return baseDamaged; }
+	void resetDamageEffect() { baseDamaged = false; }
+	bool isbaseDamged() const { return baseDamaged; } 
 
 
 	// Game functions

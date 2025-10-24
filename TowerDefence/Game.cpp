@@ -13,6 +13,7 @@ Game::Game() {
 	}
 
 	font = TTF_OpenFont("BBHSansHegarty-Regular.ttf", 16);
+	fontSmall = TTF_OpenFont("BBHSansHegarty-Regular.ttf", 12);
 	if (!font) {
 		SDL_Log("Failed to load font: %s", TTF_GetError());
 	}

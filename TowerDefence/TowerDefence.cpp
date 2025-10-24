@@ -239,7 +239,7 @@ void Game::drawTowerControls() {
 
 	int controlX = 5;
 	int controlY = 21 * gridSize; // 4 tower types
-	int controlWidth = gridSize * 2;
+	int controlWidth = gridSize * 4;
 	int controlHeight = gridSize * 4;
 
 	SDL_Color textColor = { 255, 255, 255, 255 };
@@ -250,17 +250,35 @@ void Game::drawTowerControls() {
 	SDL_Rect controlRect = { controlX - 5 , controlY , controlWidth, controlHeight };
 	SDL_RenderFillRect(renderer, &controlRect);
 	
+
+
+	// Tower prices
+	const int towerPrices[4] = { 50, 100, 200, 300 }; // Change to class gets?
+
 	// For each tower type
 	for (int i = 0; i < 4; ++i) {
 		std::string controlText = std::to_string(i + 1);
+		std::string priceText = " $" + std::to_string(towerPrices[i]);
 		SDL_Surface* controlSurface = TTF_RenderText_Blended(font, controlText.c_str(), textColor);
 		SDL_Texture* controlTexture = SDL_CreateTextureFromSurface(renderer, controlSurface);
+		SDL_Surface* priceSurface = TTF_RenderText_Blended(fontSmall, priceText.c_str(), textColor);
+		SDL_Texture* priceTexture = SDL_CreateTextureFromSurface(renderer, priceSurface);
 		int w, h;
+		int priceW, priceH;
 		SDL_QueryTexture(controlTexture, NULL, NULL, &w, &h);
+		SDL_QueryTexture(priceTexture, NULL, NULL, &priceW, &priceH);
+
 		SDL_Rect controlRect = { controlX, controlY + i * gridSize, w, h };
 		SDL_RenderCopy(renderer, controlTexture, NULL, &controlRect);
+
+		SDL_Rect priceRect = { controlX + 45, controlY + i * gridSize + 5, priceW, priceH };
+		SDL_RenderCopy(renderer, priceTexture, NULL, &priceRect);
+
 		SDL_FreeSurface(controlSurface);
 		SDL_DestroyTexture(controlTexture);
+		
+		SDL_FreeSurface(priceSurface);
+		SDL_DestroyTexture(priceTexture);
 
 		towerType type = static_cast<towerType>(i);  
 
@@ -276,7 +294,7 @@ void Game::drawHUD() {
 	int hudX = 5;
 	int hudY = 5;
 	int hudWidth = gridSize * 8;
-	int hudHeight = gridSize * 4;
+	int hudHeight = gridSize * 5;
 
 	SDL_Color textColor = { 255, 255, 255, 255 };
 
@@ -287,6 +305,9 @@ void Game::drawHUD() {
 	SDL_RenderFillRect(renderer, &hudRect);
 
 	// Health
+	if (isbaseDamged()) {
+		textColor = { 255, 0, 0, 255 }; 
+	}
 	std::string healthText = "Base Health: " + std::to_string(baseHealth);
 	SDL_Surface* healthSurface = TTF_RenderText_Blended(font, healthText.c_str(), textColor);
 	SDL_Texture* healthTexture = SDL_CreateTextureFromSurface(renderer, healthSurface);
@@ -296,6 +317,8 @@ void Game::drawHUD() {
 	SDL_RenderCopy(renderer, healthTexture, NULL, &healthRect);
 	SDL_FreeSurface(healthSurface);
 	SDL_DestroyTexture(healthTexture);
+
+	textColor = { 255, 255, 255, 255 };
 
 	// Money
 	std::string moneyText = "Money: " + std::to_string(money);
@@ -327,6 +350,18 @@ void Game::drawHUD() {
 	SDL_FreeSurface(enemiesSurface);
 	SDL_DestroyTexture(enemiesTexture);
 
+	if (!waveStart) {
+		std::string startText = "Press Y to start wave";
+		SDL_Color textColor = { 255, 160, 0, 255 };
+		SDL_Surface* startSurface = TTF_RenderText_Blended(font, startText.c_str(), textColor);
+		SDL_Texture* startTexture = SDL_CreateTextureFromSurface(renderer, startSurface);
+		int w, h;
+		SDL_QueryTexture(startTexture, NULL, NULL, &w, &h);
+		SDL_Rect startRect = { 5, 4 * gridSize, w, h };
+		SDL_RenderCopy(renderer, startTexture, NULL, &startRect);
+		SDL_FreeSurface(startSurface);
+		SDL_DestroyTexture(startTexture);
+	}
 
 }
 
@@ -371,6 +406,43 @@ void Game::drawUpgradeMenu() {
 	SDL_FreeSurface(upgradeRangeSurface);
 	SDL_DestroyTexture(upgradeDamageTexture);
 	SDL_DestroyTexture(upgradeRangeTexture);
+
+	// cost
+	int upgradeCost = towers[selectedTower]->getUpgradeCost();
+	string upgradeCostText1 = "Cost: $" + to_string(upgradeCost);
+	string upgradeCostText2 = "Cost: $" + to_string(upgradeCost);
+
+	SDL_Color upgradeCostColor = { 0, 150, 0, 255 };
+	if (money < upgradeCost) {
+		upgradeCostColor = { 255, 0, 0, 255 };
+	}
+
+	
+	SDL_Surface* upgradeCostSurface1 = TTF_RenderText_Blended(fontSmall, upgradeCostText1.c_str(), upgradeCostColor);
+	SDL_Surface* upgradeCostSurface2 = TTF_RenderText_Blended(fontSmall, upgradeCostText2.c_str(), upgradeCostColor);
+	SDL_Texture* upgradeCostTexture1 = SDL_CreateTextureFromSurface(renderer, upgradeCostSurface1);
+	SDL_Texture* upgradeCostTexture2 = SDL_CreateTextureFromSurface(renderer, upgradeCostSurface2);
+
+	int upgradeCostW1, upgradeCostH1, upgradeCostW2, upgradeCostH2;
+	SDL_QueryTexture(upgradeCostTexture1, NULL, NULL, &upgradeCostW1, &upgradeCostH1);
+	SDL_QueryTexture(upgradeCostTexture2, NULL, NULL, &upgradeCostW2, &upgradeCostH2);
+
+	SDL_Rect upgradeCostRect1 = { menyX + 90, menyY + 35, upgradeCostW1, upgradeCostH1 };
+	SDL_Rect upgradeCostRect2 = { menyX + 90, menyY + 85, upgradeCostW2, upgradeCostH2 };
+
+
+		
+	
+	if (towers[selectedTower]->getUpgrade1Level() != towers[selectedTower]->getMaxUpgrade1Level()) {
+		SDL_RenderCopy(renderer, upgradeCostTexture1, NULL, &upgradeCostRect1);
+	}
+	if (towers[selectedTower]->getUpgrade2Level() != towers[selectedTower]->getMaxUpgrade2Level()) {
+		SDL_RenderCopy(renderer, upgradeCostTexture2, NULL, &upgradeCostRect2);
+	}
+	SDL_FreeSurface(upgradeCostSurface1);
+	SDL_FreeSurface(upgradeCostSurface2);
+	SDL_DestroyTexture(upgradeCostTexture1);
+	SDL_DestroyTexture(upgradeCostTexture2);
 }
 
 void Game::Render() {
@@ -504,7 +576,10 @@ void Game::Render() {
 	//cout << "Money: " << money;
 	//// Print Wave Number
 
+		// Wave Start
+
 	drawHUD();
+	resetDamageEffect();
 	drawTowerControls();
 	SDL_RenderPresent(renderer);
 	SDL_Delay(50);
@@ -535,7 +610,7 @@ bool Game::isTileHUD (int x, int y) {
 	int hudX = 5;
 	int hudY = 5;
 	int hudWidth = gridSize * 8;
-	int hudHeight = gridSize * 4;
+	int hudHeight = gridSize * 5;
 	// Check if tile is inside HUD area
 	if (x * gridSize >= hudX - 5 && x * gridSize < hudX - 5 + hudWidth &&
 		y * gridSize >= hudY - 5 && y * gridSize < hudY - 5 + hudHeight) {
@@ -545,7 +620,7 @@ bool Game::isTileHUD (int x, int y) {
 	// Tower controls area
 	int controlX = 0;
 	int controlY = 21 * gridSize; // 4 tower types
-	int controlWidth = gridSize * 2;
+	int controlWidth = gridSize * 4;
 	int controlHeight = gridSize * 4;
 	if (x * gridSize >= controlX && x * gridSize < controlX + controlWidth &&
 		y * gridSize >= controlY && y * gridSize < controlY + 4 * controlHeight) {
@@ -659,14 +734,23 @@ void Game::Input() {
 
 				if (selectedTower >= 0 && selectedTower < towers.size()) {
 					Tower* t = towers[selectedTower].get();
+					int upgradeCost = t->getUpgradeCost();
 					switch (event.key.keysym.scancode) {
 					case SDL_SCANCODE_1: // Upgrade 1 selected
-						t->upgrade1();
-						openUpgradeMenu = false; // Close menu
+						if (money >= upgradeCost) {
+							money -= upgradeCost;
+							t->upgrade1();
+							openUpgradeMenu = false; // Close menu
+						}
+						
 						break;
 					case SDL_SCANCODE_2: // Upgrade 1 selected
-						t->upgrade2();
-						openUpgradeMenu = false; // Close menu
+						if (money >= upgradeCost) {
+							money -= upgradeCost;
+							t->upgrade2();
+							openUpgradeMenu = false; // Close menu
+						}
+						
 						break;
 
 					}
@@ -675,8 +759,8 @@ void Game::Input() {
 		}
 	}
 				
-	// Wave Start
-	
+
+
 	/*if (!waveStart) {
 		cout << endl << "Press Y to start wave";
 	}*/
@@ -734,10 +818,9 @@ void Game::Logic() {
 		if (enemies[i]->getPathPosition() >= pathLength) {
 			// Decrease player health
 			baseHealth--;
-
+			baseDamaged = true;
 			// Delete enemy
 			enemies.erase(enemies.begin() + i); // Delete from vector
-			i--;
 			continue;
 			
 		}
