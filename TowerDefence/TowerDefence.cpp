@@ -221,9 +221,6 @@ void drawEnemy(SDL_Renderer* renderer, int x, int y, int gridSize, Enemy* enemy,
 	}
 	
 
-	
-
-
 	// Loop through tile and draw pixel within radius
 	for (int yOffset = -radius; yOffset <= radius; yOffset++) {
 		for (int xOffset = -radius; xOffset <= radius; xOffset++) {
@@ -339,19 +336,19 @@ void Game::drawUpgradeMenu() {
 
 	// Draw upgrade menu background
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 200);
-	SDL_Rect upgradeMenuRect = { menyX, menyY, 160, 110 };
+	SDL_Rect upgradeMenuRect = { menyX, menyY, 180, 110 };
 	SDL_RenderFillRect(renderer, &upgradeMenuRect);
 
 	// Draw upgrade options 
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	SDL_Rect upgrade1Rect = { menyX + 10, menyY + 10, 140, 40 };
-	SDL_Rect upgrade2Rect = { menyX + 10, menyY + 60, 140, 40 };
+	SDL_Rect upgrade1Rect = { menyX + 10, menyY + 10, 160, 40 };
+	SDL_Rect upgrade2Rect = { menyX + 10, menyY + 60, 160, 40 };
 	SDL_RenderFillRect(renderer, &upgrade1Rect);
 	SDL_RenderFillRect(renderer, &upgrade2Rect);
 
 	// Upgrade Text
-	string upgradeDamageText = "1 - Damage " + to_string(towers[selectedTower]->getUpgrade1Level()) + "/" + to_string(towers[selectedTower]->getMaxUpgrade1Level());
-	string upgradeRangeText = "2 - Range " + to_string(towers[selectedTower]->getUpgrade2Level()) + " / " + to_string(towers[selectedTower]->getMaxUpgrade2Level());
+	string upgradeDamageText = "1 - " + towers[selectedTower]->getUpgrade1Name() + " " + to_string(towers[selectedTower]->getUpgrade1Level()) + "/" + to_string(towers[selectedTower]->getMaxUpgrade1Level());
+	string upgradeRangeText = "2 - " + towers[selectedTower]->getUpgrade2Name() + " " + to_string(towers[selectedTower]->getUpgrade2Level()) + " / " + to_string(towers[selectedTower]->getMaxUpgrade2Level());
 	SDL_Color textColor = { 255, 0, 0, 255 };
 	SDL_Surface* upgradeDamageSurface = TTF_RenderText_Blended(font, upgradeDamageText.c_str(), textColor);
 	SDL_Surface* upgradeRangeSurface = TTF_RenderText_Blended(font, upgradeRangeText.c_str(), textColor);
@@ -378,14 +375,9 @@ void Game::drawUpgradeMenu() {
 
 void Game::Render() {
 
-	
-
-
 	// Drawn background
-	SDL_SetRenderDrawColor(renderer, 60, 130, 30, 255);
+	SDL_SetRenderDrawColor(renderer, 40, 140, 40, 255);
 	SDL_RenderClear(renderer);
-
-	// Draw random points?
 
 		// Draw flood areas
 	for (floodArea& flood : floodAreas) {
@@ -579,18 +571,34 @@ void Game::Input() {
 				cursorDir = static_cast<Direction>((cursorDir + 3) % 4);
 				break;
 			case SDL_SCANCODE_W:
+				if (openUpgradeMenu) {
+					openUpgradeMenu = false;
+					break;
+				}
 				if (cursorY > 0 && !isTileHUD(cursorX, cursorY - 1))
 					cursorY--;
 				break;
 			case SDL_SCANCODE_S:
+				if (openUpgradeMenu) {
+					openUpgradeMenu = false;
+					break;
+				}
 				if (cursorY < height - 1 && !isTileHUD(cursorX, cursorY + 1))
 					cursorY++;
 				break;
 			case SDL_SCANCODE_A:
+				if (openUpgradeMenu) {
+					openUpgradeMenu = false;
+					break;
+				}
 				if (cursorX > 0 && !isTileHUD(cursorX - 1, cursorY))
 					cursorX--;
 				break;
 			case SDL_SCANCODE_D:
+				if (openUpgradeMenu) {
+					openUpgradeMenu = false;
+					break;
+				}
 				if (cursorX < width - 1 && !isTileHUD(cursorX + 1, cursorY))
 					cursorX++;
 				break;
@@ -598,7 +606,7 @@ void Game::Input() {
 				waveStart = true;
 				break;
 
-			// Buy Towers
+				// Buy Towers
 			case SDL_SCANCODE_1:
 				if (money >= 50 && isTileFree(cursorX, cursorY)) {
 					towers.push_back(std::make_unique<basicTower>(cursorX, cursorY, cursorDir));
@@ -624,7 +632,7 @@ void Game::Input() {
 					money -= 300;
 				}
 				break;
-			// Upgrade Menu
+				// Upgrade Menu
 			case SDL_SCANCODE_F:
 				// Upgrade tower at cursor position
 				for (int t = 0; t < towers.size(); t++) {
@@ -648,36 +656,30 @@ void Game::Input() {
 
 			// buy upgrades
 			if (openUpgradeMenu) {
-				switch (event.key.keysym.scancode) {
-				case SDL_SCANCODE_1: // Upgrade 1 selected
-					if (selectedTower >= 0 && selectedTower < towers.size()) {
-						towers[selectedTower]->upgradeDamage();
+
+				if (selectedTower >= 0 && selectedTower < towers.size()) {
+					Tower* t = towers[selectedTower].get();
+					switch (event.key.keysym.scancode) {
+					case SDL_SCANCODE_1: // Upgrade 1 selected
+						t->upgrade1();
 						openUpgradeMenu = false; // Close menu
+						break;
+					case SDL_SCANCODE_2: // Upgrade 1 selected
+						t->upgrade2();
+						openUpgradeMenu = false; // Close menu
+						break;
+
 					}
-					break;
-				case SDL_SCANCODE_2: // Upgrade 2 selected
-					if (selectedTower >= 0 && selectedTower < towers.size()) {
-						towers[selectedTower]->upgradeMultiShot();
-						openUpgradeMenu = false;
-					}
-					break;
 				}
 			}
-	
-		
-
 		}
 	}
-
-
-	
-
+				
 	// Wave Start
 	
 	/*if (!waveStart) {
 		cout << endl << "Press Y to start wave";
 	}*/
-
 
 }
 
@@ -724,8 +726,6 @@ void Game::Logic() {
 	}
 
 
-
-
 	// Move enemies
 	for (int i = 0; i < enemies.size(); ++i) {
 		enemies[i]->move(pathX, pathY, pathLength); // Loop through vector and move each
@@ -737,6 +737,7 @@ void Game::Logic() {
 
 			// Delete enemy
 			enemies.erase(enemies.begin() + i); // Delete from vector
+			i--;
 			continue;
 			
 		}
@@ -756,10 +757,6 @@ void Game::Logic() {
 		gameOver = true;
 		cout << endl <<"GAME OVER";
 	}
-
-	
-
-
 
 	// Tower attacks
 	for (int t = 0; t < towers.size(); t++) { // Loop through towers
@@ -786,7 +783,6 @@ void Game::Logic() {
 		if (towerDisabled) {
 			continue; // Skip fire
 		}
-
 
 
 		if (towers[t]->getFireTick() < towers[t]->getFireRate())
@@ -829,7 +825,7 @@ void Game::Logic() {
 						case LEFT:  projX--; break;
 						}
 						projectiles.emplace_back(projX, projY, attackDir, 1, damage, range, 0);
-						fwTower->resetFireTick(attackDir); // Reset fire tick for specific direction
+						fwTower->resetFireTick(attackDir); // Reset fire    tick for specific direction
 					}
 				}
 			}

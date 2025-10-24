@@ -32,6 +32,7 @@ private:
 	int pathLength = 0;
 	bool pathMove;
 
+
 	// Input
 	int cursorX = 10, cursorY = 10;
 	Direction cursorDir;

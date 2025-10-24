@@ -1,5 +1,7 @@
 #pragma once
 #include "Direction.h"
+#include <string>
+using namespace std;
 
 enum towerType { BASIC, LONG_RANGE, HEAVY_DAMAGE, FOUR_WAY }; // Tower Types
 
@@ -12,6 +14,8 @@ protected:
 	int fireRate; 
 	int fireTick;
 
+	string upgrade1Name;
+	string upgrade2Name;
 	int upgrade1Level = 0;
 	int upgrade2Level = 0;
 	int maxUpgrade1Level = 3;
@@ -50,11 +54,15 @@ public:
 	int getDamage() const { return towerDamage; }
 	int getFireRate() const { return fireRate; }
 	int getFireTick() const { return fireTick; }
+	string getUpgrade1Name() const { return upgrade1Name; }
+	string getUpgrade2Name() const { return upgrade2Name; }
 	int getUpgrade1Level() const { return upgrade1Level; }
 	int getUpgrade2Level() const { return upgrade2Level; }
 	int getUpgradeCost() const { return upgradeCost; }
 	int getMaxUpgrade1Level() const { return maxUpgrade1Level; }
 	int getMaxUpgrade2Level() const { return maxUpgrade2Level; }
+	virtual bool upgrade1() { return false; }
+	virtual bool upgrade2() { return false; }
 
 	virtual bool upgradeRange() { return false; }
 	virtual bool upgradeDamage() { return false; }
@@ -66,43 +74,70 @@ class basicTower : public Tower {
 	public:
 		bool multiShot = false; // Upgrade 3
 
-		basicTower(int x, int y, Direction dir) : Tower(x, y, 1, 5, dir, 20) {} // Damage 1, Range 5, Fire Rate 20 (Adjust)
+		basicTower(int x, int y, Direction dir) : Tower(x, y, 1, 5, dir, 20) {
+			upgrade1Name = "Damage";
+			upgrade2Name = "MultiShot";
+		} // Damage 1, Range 5, Fire Rate 20 (Adjust)
 		virtual towerType getTowerType() const { return BASIC; }
 
 		bool upgradeDamage() override;
 		bool upgradeMultiShot();
+
+		bool upgrade1() override { return upgradeDamage(); }
+		bool upgrade2() override { return upgradeMultiShot(); }
+
+		
 };
 
 class longRangeTower : public Tower {
 	public:
 		bool pierce = false;
 
-		longRangeTower(int x, int y, Direction dir) : Tower(x, y, 1, 10, dir, 10) {} // Damage 1, Range 10
+		longRangeTower(int x, int y, Direction dir) : Tower(x, y, 1, 10, dir, 10) {
+			upgrade1Name = "Range";
+			upgrade2Name = "Pierce";
+		} // Damage 1, Range 10
 		virtual towerType getTowerType() const { return LONG_RANGE; }
 		
 		bool upgradePierce();
 		bool upgradeRange() override;
+
+		bool upgrade1() override { return upgradeRange(); }
+		bool upgrade2() override { return upgradePierce(); }
 };
 
 class heavyDamageTower : public Tower {
 	public:
 		bool slow = false;
 
-		heavyDamageTower(int x, int y, Direction dir) : Tower(x, y, 3, 3, dir, 10) {} // Damage 3, Range 3
+		heavyDamageTower(int x, int y, Direction dir) : Tower(x, y, 3, 3, dir, 10) {
+			upgrade1Name = "Slow";
+			upgrade2Name = "Range";
+		} // Damage 3, Range 3
 		virtual towerType getTowerType() const { return HEAVY_DAMAGE; }
 		
-		bool upgradeSlow();
 		bool upgradeRange() override;
+		bool upgradeSlow();
+		
+
+		bool upgrade1() override { return upgradeRange(); }
+		bool upgrade2() override { return upgradeSlow(); }
 };
 
 class fourWayTower : public Tower {
 	int fireTicks[4] = { 0,0,0,0 }; // cooldown for each direction
 	public:
-		fourWayTower(int x, int y, Direction dir) : Tower(x, y, 1, 4, dir, 10) {} // Damage 1, Range 4, shoots in all directions
+		fourWayTower(int x, int y, Direction dir) : Tower(x, y, 1, 4, dir, 10) {
+			upgrade1Name = "Fire Rate";
+			upgrade2Name = "Range";
+		} // Damage 1, Range 4, shoots in all directions
 		virtual towerType getTowerType() const { return FOUR_WAY; }
 		
 		bool upgradeFireRate();
 		bool upgradeRange() override;
+
+		bool upgrade1() override { return upgradeFireRate(); }
+		bool upgrade2() override { return upgradeRange(); }
 
 		void incrementFireTicks() {
 			for (int i = 0; i < 4; i++) // all four direcxtions
