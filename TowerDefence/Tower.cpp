@@ -18,17 +18,17 @@ bool basicTower::upgradeDamage() {
 
     upgrade1Level++;
     towerDamage += 1; // Increase damage
-    totalUpgradeCost += upgradeCost;
-    upgradeCost += 300;
+    totalUpgradeCost += upgrade1Cost;
+    upgrade1Cost += 300;
     return true;
 }
 
-bool basicTower::upgradeMultiShot() {
+bool basicTower::upgradeBurn() {
     if (upgrade2Level >= maxUpgrade2Level) return false;
 
     upgrade2Level++;
-    totalUpgradeCost += upgradeCost;
-	multiShot = true; // Shott multiple projectiles
+    totalUpgradeCost += upgrade2Cost;
+	burn = true; // Burn Enemies
     return true;
 }
 
@@ -39,8 +39,8 @@ bool longRangeTower::upgradeRange() {
 
     upgrade1Level++;
     towerRange += 2; // Increase range
-    totalUpgradeCost += upgradeCost;
-    upgradeCost += 400;
+    totalUpgradeCost += upgrade1Cost;
+    upgrade1Cost += 400;
     return true;
 }
 
@@ -48,7 +48,7 @@ bool longRangeTower::upgradePierce() {
     if (upgrade2Level >= maxUpgrade2Level) return false;
 
     upgrade2Level++;
-    totalUpgradeCost += upgradeCost;
+    totalUpgradeCost += upgrade2Cost;
     pierce = true; // Piece enemies
     return true;
 }
@@ -59,8 +59,8 @@ bool heavyDamageTower::upgradeRange() {
     upgrade1Level++;
 
     towerRange += 1; // Increase range
-    totalUpgradeCost += upgradeCost;
-    upgradeCost += 750;
+    totalUpgradeCost += upgrade1Cost;
+    upgrade1Cost += 750;
     return true;
 }
 
@@ -68,7 +68,7 @@ bool heavyDamageTower::upgradeSlow() {
     if (upgrade2Level >= maxUpgrade2Level) return false;
 
     upgrade2Level++;
-    totalUpgradeCost += upgradeCost;
+    totalUpgradeCost += upgrade2Cost;
     slow = true; // Slow enemies
     return true;
 }
@@ -79,8 +79,8 @@ bool fourWayTower::upgradeFireRate() {
 
     upgrade1Level++;
 	fireRate -= 2; // Increase fire rate
-    totalUpgradeCost += upgradeCost;
-    upgradeCost += 2500;
+    totalUpgradeCost += upgrade1Cost;
+    upgrade1Cost += 2500;
     return true;
 }
 
@@ -89,6 +89,6 @@ bool fourWayTower::upgradeRange() {
 
     upgrade2Level++;
     towerRange += 1; // Increase range
-    totalUpgradeCost += upgradeCost;
+    totalUpgradeCost += upgrade2Cost;
     return true;
 }

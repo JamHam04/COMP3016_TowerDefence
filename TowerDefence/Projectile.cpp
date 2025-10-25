@@ -9,6 +9,7 @@ Projectile::Projectile(int x, int y, Direction dir, int s, int d, int r, int dis
 	moveTick = 0;
 	penetrate = false;
 	slow = false;
+	burn = false;
 	range = r;
 	distance = dis;
 

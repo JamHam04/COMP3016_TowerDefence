@@ -1,11 +1,9 @@
 #include "Enemy.h"
 
 Enemy::Enemy(int h, int s)
-    : health(h), pathPosition(0), speed(s), moveTick(0), x(0), y(0)
-{
-	enemySlowed = false;
-
-}
+	: health(h), pathPosition(0), speed(s), moveTick(0), x(0), y(0),
+	enemySlowed(false), enemyBurned(false), burnDamage(0), burnDuration(0)
+{}
 
 void Enemy::move(const int pathX[], const int pathY[], int pathLength)
 {
@@ -13,6 +11,25 @@ void Enemy::move(const int pathX[], const int pathY[], int pathLength)
 	if (pathPosition >= pathLength)
         return;
     
+	if (enemyBurned) {
+		burnTick++;
+		// Burn damage
+		if (burnTick >= 20) { // Burn every 20 ticks
+			health -= burnDamage;
+			enemyBurnEffect = true;
+			if (health < 0) health = 0;
+			burnDuration--;
+			burnTick = 0;
+			if (burnDuration <= 0) { // How long burn lasts
+				enemyBurned = false; // Remove burn effect
+				
+			}
+		}
+
+		
+	}
+
+
 
 	// If at end
 	if (moveTick != speed) {
@@ -43,4 +60,17 @@ void Enemy::enemySlow(int slowAmount)
 	}
 
 	// Slow timer? (remove effect after some time)
+}
+
+void Enemy::enemyBurn(int burnDamage, int burnTick)
+{
+	// Burn effet 
+	if (!enemyBurned) {
+		enemyBurned = true;
+		this->burnDamage = burnDamage;
+		this->burnDuration = burnTick;
+		this->burnTick = 0;
+
+	}
+
 }

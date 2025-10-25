@@ -66,8 +66,8 @@ void Game::Setup() {
 	// Setup waves (Change to file load?)
 	waves.push_back(std::make_unique<Wave>(25, 5, 0)); // 10 smallEnemy, spawn every 25 ticks
 	waves.push_back(std::make_unique<Wave>(20, 2, 1));  // 5 mediumEnemy, spawn every 20 ticks
-	waves.push_back(std::make_unique<Wave>(15, 3, 2)); // 15 smallEnemy, spawn every 15 ticks
-	waves.push_back(std::make_unique<Wave>(15, 5, 0));
+	waves.push_back(std::make_unique<Wave>(50, 3, 2)); // 15 smallEnemy, spawn every 15 ticks
+	waves.push_back(std::make_unique<Wave>(20, 5, 0));
 	waves.push_back(std::make_unique<Wave>(15, 5, 0));
 
 	// Setup special waves
@@ -219,7 +219,9 @@ void drawEnemy(SDL_Renderer* renderer, int x, int y, int gridSize, Enemy* enemy,
 	if (enemy->enemyHitEffect()) {
 		SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255); // Flash white
 	}
-	
+	if (enemy->enemyBurnHitEffect()) {
+		SDL_SetRenderDrawColor(renderer, 255, 100, 0, 255); // Flash orange
+	}
 
 	// Loop through tile and draw pixel within radius
 	for (int yOffset = -radius; yOffset <= radius; yOffset++) {
@@ -427,18 +429,23 @@ void Game::drawUpgradeMenu() {
 	SDL_DestroyTexture(upgradeRangeTexture);
 
 	// Upgrade Costs
-	int upgradeCost = towers[selectedTower]->getUpgradeCost();
-	string upgradeCostText1 = "Cost: $" + to_string(upgradeCost);
-	string upgradeCostText2 = "Cost: $" + to_string(upgradeCost);
+	int upgrade1Cost = towers[selectedTower]->getUpgrade1Cost();
+	int upgrade2Cost = towers[selectedTower]->getUpgrade2Cost();
+	string upgradeCostText1 = "Cost: $" + to_string(upgrade1Cost);
+	string upgradeCostText2 = "Cost: $" + to_string(upgrade2Cost);
 
-	SDL_Color upgradeCostColor = { 0, 150, 0, 255 };
-	if (money < upgradeCost) {
-		upgradeCostColor = { 255, 0, 0, 255 }; // Not enough money
+	SDL_Color upgrade1CostColor = { 0, 150, 0, 255 };
+	SDL_Color upgrade2CostColor = { 0, 150, 0, 255 };
+	if (money < upgrade1Cost) {
+		upgrade1CostColor = { 255, 0, 0, 255 }; // Not enough money
+	}
+	if (money < upgrade2Cost) {
+		upgrade2CostColor = { 255, 0, 0, 255 }; // Not enough money
 	}
 
 	
-	SDL_Surface* upgradeCostSurface1 = TTF_RenderText_Blended(fontSmall, upgradeCostText1.c_str(), upgradeCostColor);
-	SDL_Surface* upgradeCostSurface2 = TTF_RenderText_Blended(fontSmall, upgradeCostText2.c_str(), upgradeCostColor);
+	SDL_Surface* upgradeCostSurface1 = TTF_RenderText_Blended(fontSmall, upgradeCostText1.c_str(), upgrade1CostColor);
+	SDL_Surface* upgradeCostSurface2 = TTF_RenderText_Blended(fontSmall, upgradeCostText2.c_str(), upgrade2CostColor);
 	SDL_Texture* upgradeCostTexture1 = SDL_CreateTextureFromSurface(renderer, upgradeCostSurface1);
 	SDL_Texture* upgradeCostTexture2 = SDL_CreateTextureFromSurface(renderer, upgradeCostSurface2);
 
@@ -504,6 +511,7 @@ void Game::Render() {
 	for (int enemy = 0; enemy < enemies.size(); enemy++) {
 		drawEnemy(renderer, enemies[enemy]->getX(), enemies[enemy]->getY(), gridSize, enemies[enemy].get(), enemies[enemy]->getEnemyType());
 		enemies[enemy]->resetHitEffect();
+		enemies[enemy]->resetBurnHitEffect();
 	}
 
 
@@ -613,7 +621,7 @@ bool Game::isTileFree(int x, int y) {
 		}
 	}
 	for (int k = 0; k < pathLength; k++) {
-		if (pathX[k] == cursorX && pathY[k] == cursorY) { // If position is a path
+		if (pathX[k] == x && pathY[k] == y) { // If position is a path
 			return false;
 		}
 
@@ -769,19 +777,20 @@ void Game::Input() {
 
 				if (selectedTower >= 0 && selectedTower < towers.size()) {
 					Tower* t = towers[selectedTower].get();
-					int upgradeCost = t->getUpgradeCost();
+					int upgrade1Cost = t->getUpgrade1Cost();
+					int upgrade2Cost = t->getUpgrade2Cost();
 					switch (event.key.keysym.scancode) {
 					case SDL_SCANCODE_1: // Upgrade 1 selected
-						if (money >= upgradeCost) {
-							money -= upgradeCost;
+						if (money >= upgrade1Cost && t->getUpgrade1Level() < t->getMaxUpgrade1Level()) {
+							money -= upgrade1Cost;
 							t->upgrade1();
 							openUpgradeMenu = false; // Close menu
 						}
-						
+		
 						break;
 					case SDL_SCANCODE_2: // Upgrade 1 selected
-						if (money >= upgradeCost) {
-							money -= upgradeCost;
+						if (money >= upgrade2Cost && t->getUpgrade2Level() < t->getMaxUpgrade2Level()) {
+							money -= upgrade2Cost;
 							t->upgrade2();
 							openUpgradeMenu = false; // Close menu
 						}
@@ -848,7 +857,7 @@ void Game::Logic() {
 	// Move enemies
 	for (int i = 0; i < enemies.size(); ++i) {
 		enemies[i]->move(pathX, pathY, pathLength); // Loop through vector and move each
-		enemies[i]->enemyHitEffect();
+		
 
 		if (enemies[i]->getPathPosition() >= pathLength) {
 			// Decrease player health
@@ -981,9 +990,19 @@ void Game::Logic() {
 					case DOWN:  projY++; break;
 					case LEFT:  projX--; break;
 					}
+					Projectile p(projX, projY, dir, 1, damage, range, 0);
+					if (type == BASIC) {
+						basicTower* bTower = static_cast<basicTower*>(towers[t].get());
+						if (bTower->burn) {
+							p.setBurn(true); // Set burn
+						}
+						projectiles.push_back(p);
+						towers[t]->resetFireTick(); // Reset fire tick
+
+					}
 					if (type == LONG_RANGE) {
 						longRangeTower* lrTower = static_cast<longRangeTower*>(towers[t].get());
-						Projectile p(projX, projY, dir, 1, damage, range, 0);
+						
 						if (lrTower->pierce) {
 
 							p.setPenetrate(true); 
@@ -998,7 +1017,6 @@ void Game::Logic() {
 					}
 					if (type == HEAVY_DAMAGE) {
 						heavyDamageTower* hdTower = static_cast<heavyDamageTower*>(towers[t].get());
-						Projectile p(projX, projY, dir, 1, damage, range, 0);
 						if (hdTower->slow) {
 							p.setSlow(true);
 						}
@@ -1033,14 +1051,22 @@ void Game::Logic() {
 				// When enemy hit
 				enemies[e]->hit(damage); // Apply damage to enemy
 				
+				// Slow
 				if (projectiles[p].canSlow()) {
 					std::cout << "Slow";
-					enemies[e]->enemySlow(2);
+					enemies[e]->enemySlow(4);
 				}
+				//burn
+				if (projectiles[p].canBurn()) {
+					std::cout << "Burn";
+					enemies[e]->enemyBurn(3, 2); // 3 damage, 2 times
+				}
+				// Pierce
 				if (!projectiles[p].canPenetrate()) {
 					enemyHit = true; // Remove projectile after loop
 					break;
 				}
+				
 	
 			}
 		}
@@ -1056,6 +1082,10 @@ void Game::Logic() {
 		if (towers[t]->deleteTower()) {
 			// Refund money
 			money += towers[t]->refundTower();
+
+			openUpgradeMenu = false; // Close upgrade menu if open
+
+
 			// Remove from vector
 			towers.erase(towers.begin() + t);
 			t--;

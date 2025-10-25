@@ -12,6 +12,13 @@ private:
 	bool enemyDamaged;
 	int slowAmount;
 	bool enemySlowed;
+
+	int burnDamage;
+	int burnTick;
+	int burnDuration;
+	bool enemyBurned;
+	bool enemyBurnEffect;
+
 public:
 
 	
@@ -26,9 +33,12 @@ public:
 	void hit(int damage);
 	bool enemyHitEffect() { return enemyDamaged; }
 	void resetHitEffect() { enemyDamaged = false; }
+	bool enemyBurnHitEffect() { return enemyBurnEffect; }
+	void resetBurnHitEffect() { enemyBurnEffect = false; }
 
 	// Slow effect
 	void enemySlow(int slowAmount); 
+	void enemyBurn(int burnDamage, int burnTick);
 
 
 	int getX() const { return x; }
