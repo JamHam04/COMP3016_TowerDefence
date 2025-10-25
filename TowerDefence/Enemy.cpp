@@ -2,7 +2,10 @@
 
 Enemy::Enemy(int h, int s)
     : health(h), pathPosition(0), speed(s), moveTick(0), x(0), y(0)
-{}
+{
+	enemySlowed = false;
+
+}
 
 void Enemy::move(const int pathX[], const int pathY[], int pathLength)
 {
@@ -15,6 +18,8 @@ void Enemy::move(const int pathX[], const int pathY[], int pathLength)
 	if (moveTick != speed) {
 		moveTick++;
 	}
+
+
 	else {
 		x = pathX[pathPosition];
 		y = pathY[pathPosition];
@@ -28,4 +33,14 @@ void Enemy::hit(int damage)
     health -= damage;
     if (health < 0) health = 0;
 	enemyDamaged = true;
+}
+
+void Enemy::enemySlow(int slowAmount)
+{
+	if (!enemySlowed) {
+		speed += slowAmount; 
+		enemySlowed = true;
+	}
+
+	// Slow timer? (remove effect after some time)
 }

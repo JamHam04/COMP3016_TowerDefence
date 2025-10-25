@@ -22,6 +22,7 @@ protected:
 	int maxUpgrade1Level = 3;
 	int maxUpgrade2Level = 1;
 	int upgradeCost = 100; // Initial upgrade cost
+	int totalUpgradeCost = 0;
 	bool towerDelete = false;;
 	
 	
@@ -65,6 +66,7 @@ public:
 	virtual bool upgrade1() { return false; }
 	virtual bool upgrade2() { return false; }
 	int getTowerCost() const { return towerCost; }
+	
 
 
 	virtual bool upgradeRange() { return false; }
@@ -76,7 +78,7 @@ public:
 
 
 	int refundTower() {
-		return towerCost;
+		return (towerCost + totalUpgradeCost) / 2; // Refund half cost spent
 	}
 
 };

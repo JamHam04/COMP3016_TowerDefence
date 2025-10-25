@@ -7,9 +7,11 @@ Projectile::Projectile(int x, int y, Direction dir, int s, int d, int r, int dis
 	speed = s;
 	damage = d;
 	moveTick = 0;
-	penetate = false;
+	penetrate = false;
+	slow = false;
 	range = r;
 	distance = dis;
+
 }
 
 void Projectile::move() {

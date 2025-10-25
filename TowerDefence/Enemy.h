@@ -10,6 +10,8 @@ private:
 	int moveTick;
 	int x, y; //Coordinates
 	bool enemyDamaged;
+	int slowAmount;
+	bool enemySlowed;
 public:
 
 	
@@ -24,6 +26,9 @@ public:
 	void hit(int damage);
 	bool enemyHitEffect() { return enemyDamaged; }
 	void resetHitEffect() { enemyDamaged = false; }
+
+	// Slow effect
+	void enemySlow(int slowAmount); 
 
 
 	int getX() const { return x; }

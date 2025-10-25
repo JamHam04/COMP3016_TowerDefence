@@ -257,8 +257,26 @@ void Game::drawTowerControls() {
 
 	// For each tower type
 	for (int i = 0; i < 4; ++i) {
+		std::unique_ptr<Tower> tower;
+		switch (i) {
+			case 0:
+				tower = std::make_unique<basicTower>(cursorX, cursorY, cursorDir);
+				break;
+			case 1:
+				tower = std::make_unique<longRangeTower>(cursorX, cursorY, cursorDir);
+				break;
+			case 2:
+				tower = std::make_unique<heavyDamageTower>(cursorX, cursorY, cursorDir);
+				break;
+			case 3:
+				tower = std::make_unique<fourWayTower>(cursorX, cursorY, cursorDir);
+				break;
+		}
+		int cost = tower->getTowerCost();
+
+
 		std::string controlText = std::to_string(i + 1);
-		std::string priceText = " $" + std::to_string(towerPrices[i]);
+		std::string priceText = " $" + std::to_string(cost);
 		SDL_Surface* controlSurface = TTF_RenderText_Blended(font, controlText.c_str(), textColor);
 		SDL_Texture* controlTexture = SDL_CreateTextureFromSurface(renderer, controlSurface);
 		SDL_Surface* priceSurface = TTF_RenderText_Blended(fontSmall, priceText.c_str(), textColor);
@@ -692,25 +710,28 @@ void Game::Input() {
 			}
 			case SDL_SCANCODE_2: {
 				std::unique_ptr<longRangeTower> tower = std::make_unique<longRangeTower>(cursorX, cursorY, cursorDir);
-				if (money >= 100 && isTileFree(cursorX, cursorY)) {
+				int cost = tower->getTowerCost();
+				if (money >= cost && isTileFree(cursorX, cursorY)) {
 					towers.push_back(std::move(tower));
-					money -= 100;
+					money -= cost;
 				}
 				break;
 			}
 			case SDL_SCANCODE_3: {
 				std::unique_ptr<heavyDamageTower> tower = std::make_unique<heavyDamageTower>(cursorX, cursorY, cursorDir);
-				if (money >= 200 && isTileFree(cursorX, cursorY)) {
+				int cost = tower->getTowerCost();
+				if (money >= cost && isTileFree(cursorX, cursorY)) {
 					towers.push_back(std::move(tower));
-					money -= 200;
+					money -= cost;
 				}
 				break;
 			}
 			case SDL_SCANCODE_4: {
 				std::unique_ptr<fourWayTower> tower = std::make_unique<fourWayTower>(cursorX, cursorY, cursorDir);
-				if (money >= 300 && isTileFree(cursorX, cursorY)) {
+				int cost = tower->getTowerCost();
+				if (money >= cost && isTileFree(cursorX, cursorY)) {
 					towers.push_back(std::move(tower));
-					money -= 300;
+					money -= cost;
 				}
 				break;
 			}
@@ -737,8 +758,9 @@ void Game::Input() {
 				for (int t = 0; t < towers.size(); t++) {
 					if (towers[t]->getTowerX() == cursorX && towers[t]->getTowerY() == cursorY) {
 						towers[t]->setTowerDelete();
+						break;
 					}
-					break;
+					
 				}
 			}
 
@@ -927,6 +949,7 @@ void Game::Logic() {
 			}
 		
 		}
+
 		else {
 			for (int e = 0; e < enemies.size(); e++) { // Loop throguh enemies
 				int enemyX = enemies[e]->getX();
@@ -951,15 +974,43 @@ void Game::Logic() {
 				if (inRange) {
 					int projX = towerX;
 					int projY = towerY;
-
+					
 					switch (dir) {
 					case UP:    projY--; break;
 					case RIGHT: projX++; break;
 					case DOWN:  projY++; break;
 					case LEFT:  projX--; break;
 					}
-					projectiles.emplace_back(projX, projY, dir, 1, damage, range, 0);
-					towers[t]->resetFireTick(); // Reset fire tick
+					if (type == LONG_RANGE) {
+						longRangeTower* lrTower = static_cast<longRangeTower*>(towers[t].get());
+						Projectile p(projX, projY, dir, 1, damage, range, 0);
+						if (lrTower->pierce) {
+
+							p.setPenetrate(true); 
+						}
+							//projectiles().setPenetrate(); // Set pirece
+			
+							projectiles.push_back(p); 
+							towers[t]->resetFireTick();
+							break;
+						
+
+					}
+					if (type == HEAVY_DAMAGE) {
+						heavyDamageTower* hdTower = static_cast<heavyDamageTower*>(towers[t].get());
+						Projectile p(projX, projY, dir, 1, damage, range, 0);
+						if (hdTower->slow) {
+							p.setSlow(true);
+						}
+
+						projectiles.push_back(p);
+						towers[t]->resetFireTick();
+						break;
+					}
+					else {
+						projectiles.emplace_back(projX, projY, dir, 1, damage, range, 0);
+						towers[t]->resetFireTick(); // Reset fire tick
+					}
 					break;
 
 				}
@@ -976,15 +1027,21 @@ void Game::Logic() {
 		int damage = projectiles[p].getDamage();
 		bool enemyHit = false;
 		// Check if hit an enemy
+
 		for (int e = 0; e < enemies.size(); e++) {
 			if (projX == enemies[e]->getX() && projY == enemies[e]->getY()) {
 				// When enemy hit
 				enemies[e]->hit(damage); // Apply damage to enemy
 				
-		
-				enemyHit = true; // Remove projectile after loop
-					
-				break;
+				if (projectiles[p].canSlow()) {
+					std::cout << "Slow";
+					enemies[e]->enemySlow(2);
+				}
+				if (!projectiles[p].canPenetrate()) {
+					enemyHit = true; // Remove projectile after loop
+					break;
+				}
+	
 			}
 		}
 
@@ -994,7 +1051,7 @@ void Game::Logic() {
 		}
 	}
 
-	 //Delete Tower - Add functions to Tower class
+	 //Delete Tower 
 	for (int t = 0; t < towers.size(); t++) {
 		if (towers[t]->deleteTower()) {
 			// Refund money

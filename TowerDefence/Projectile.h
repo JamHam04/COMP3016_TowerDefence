@@ -10,7 +10,8 @@ private:
 	int range;
 	int distance;
 	int moveTick;
-	bool penetate; // Go through enemies
+	bool penetrate; // Go through enemies
+	bool slow;
 
 public:
 	Projectile(int x, int y, Direction dir, int s, int d, int range, int distance);
@@ -22,5 +23,12 @@ public:
 	int getProjX() const { return projX; }
 	int getProjY() const { return projY; }
 	int getDamage() const { return damage; }
-	bool canPenetrate() const { return penetate; }
+
+	// Pierce Upgrade
+	void setPenetrate(bool p) { penetrate = p; }
+	bool canPenetrate() const { return penetrate; }
+
+	// Slow Upgrade
+	void setSlow(bool s) { slow = s; }
+	bool canSlow() const { return slow; }
 };
