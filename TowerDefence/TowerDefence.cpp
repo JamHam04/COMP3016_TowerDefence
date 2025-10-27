@@ -3,6 +3,8 @@
 #include <conio.h>
 #include <vector>
 #include "Game.h"
+#include <fstream>
+
 
 #include <SDL.h>
 
@@ -63,19 +65,42 @@ void Game::Setup() {
 	// Set Variables
 	createPath();
 
+	// Open file
+	string fileOutput;
+	string fileName = "waveData.txt";
+	ifstream fileToRead;
+	try {
+		fileToRead.open(fileName);
+		if (!fileToRead.is_open()) {
+			throw ios_base::failure("Could not open file");
+		}
+	}
+	catch (const ios_base::failure& e) {
+		cerr << "Error: " << e.what() << endl;
+		return;
+	}
+	catch (const exception& e) {
+		cerr << "Error: " << e.what() << endl;
+		return;
+	}
+
+	int spawnRate, enemyCount, enemyType;
+	while (fileToRead >> spawnRate >> enemyCount >> enemyType) {
+		waves.push_back(std::make_unique<Wave>(spawnRate, enemyCount, enemyType)); // Add waves from file
+	}
+	fileToRead.close();
+
 	// Setup waves (Change to file load?)
-	waves.push_back(std::make_unique<Wave>(25, 5, 0)); // 10 smallEnemy, spawn every 25 ticks
-	waves.push_back(std::make_unique<Wave>(20, 2, 1));  // 5 mediumEnemy, spawn every 20 ticks
-	waves.push_back(std::make_unique<Wave>(50, 3, 2)); // 15 smallEnemy, spawn every 15 ticks
-	waves.push_back(std::make_unique<Wave>(20, 5, 0));
-	waves.push_back(std::make_unique<Wave>(15, 5, 0));
+	//waves.push_back(std::make_unique<Wave>(25, 5, 0)); // 10 smallEnemy, spawn every 25 ticks
+	//waves.push_back(std::make_unique<Wave>(20, 2, 1));  // 5 mediumEnemy, spawn every 20 ticks
+	//waves.push_back(std::make_unique<Wave>(50, 3, 2)); // 15 smallEnemy, spawn every 15 ticks
+	//waves.push_back(std::make_unique<Wave>(20, 5, 0));
+	//waves.push_back(std::make_unique<Wave>(15, 5, 0));
 
 	// Setup special waves
 	floodAreas.push_back({ 13, 6, 3, 5, 2, false });
 	floodAreas.push_back({ 12, 15, 6, 4, 2, false });
 	floodAreas.push_back({ 3, 12, 2, 2, 2, false });
-
-	// TO DOL: ADD MORE WAVES
 }
 
 void drawTower(SDL_Renderer* renderer, int towerX, int towerY, int gridSize, Direction dir, towerType type) {
@@ -1054,7 +1079,7 @@ void Game::Logic() {
 				// Slow
 				if (projectiles[p].canSlow()) {
 					std::cout << "Slow";
-					enemies[e]->enemySlow(4);
+					enemies[e]->enemySlow(4, 2);
 				}
 				//burn
 				if (projectiles[p].canBurn()) {

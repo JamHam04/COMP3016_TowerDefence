@@ -2,7 +2,8 @@
 
 Enemy::Enemy(int h, int s)
 	: health(h), pathPosition(0), speed(s), moveTick(0), x(0), y(0),
-	enemySlowed(false), enemyBurned(false), burnDamage(0), burnDuration(0)
+	enemySlowed(false), enemyBurned(false), burnDamage(0), burnDuration(0), slowDuration(0), slowTick(0),
+	enemyDamaged(false), enemyBurnEffect(false)
 {}
 
 void Enemy::move(const int pathX[], const int pathY[], int pathLength)
@@ -29,7 +30,17 @@ void Enemy::move(const int pathX[], const int pathY[], int pathLength)
 		
 	}
 
-
+	if (enemySlowed) {
+		slowTick++;
+		if (slowTick >= 20) { // Slow every 20 ticks
+			slowDuration--;
+			slowTick = 0;
+			if (slowDuration <= 0) {
+				speed -= slowAmount; 
+				enemySlowed = false;// Remove slow effect
+			}
+		}
+	}
 
 	// If at end
 	if (moveTick != speed) {
@@ -52,24 +63,26 @@ void Enemy::hit(int damage)
 	enemyDamaged = true;
 }
 
-void Enemy::enemySlow(int slowAmount)
+void Enemy::enemySlow(int amount, int tick)
 {
 	if (!enemySlowed) {
-		speed += slowAmount; 
+		slowAmount = amount;
+		speed += slowAmount;
 		enemySlowed = true;
+		slowDuration = tick; 
+		slowTick = 0;
 	}
 
-	// Slow timer? (remove effect after some time)
 }
 
-void Enemy::enemyBurn(int burnDamage, int burnTick)
+void Enemy::enemyBurn(int amount, int tick)
 {
 	// Burn effet 
 	if (!enemyBurned) {
 		enemyBurned = true;
-		this->burnDamage = burnDamage;
-		this->burnDuration = burnTick;
-		this->burnTick = 0;
+		burnDamage = amount;
+		burnDuration = tick;
+		burnTick = 0;
 
 	}
 

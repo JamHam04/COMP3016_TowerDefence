@@ -10,8 +10,11 @@ private:
 	int moveTick;
 	int x, y; //Coordinates
 	bool enemyDamaged;
+
 	int slowAmount;
 	bool enemySlowed;
+	int slowDuration;
+	int slowTick;
 
 	int burnDamage;
 	int burnTick;
@@ -37,8 +40,8 @@ public:
 	void resetBurnHitEffect() { enemyBurnEffect = false; }
 
 	// Slow effect
-	void enemySlow(int slowAmount); 
-	void enemyBurn(int burnDamage, int burnTick);
+	void enemySlow(int amount, int tick); 
+	void enemyBurn(int amount, int tick);
 
 
 	int getX() const { return x; }
