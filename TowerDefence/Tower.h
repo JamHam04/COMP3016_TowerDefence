@@ -92,8 +92,8 @@ class basicTower : public Tower {
 
 		basicTower(int x, int y, Direction dir) : Tower(x, y, 1, 5, dir, 20) {
 			towerCost = 50;
-			upgrade1Cost = 150;
-			upgrade2Cost = 500;
+			upgrade1Cost = 100;
+			upgrade2Cost = 250;
 			upgrade1Name = "Damage";
 			upgrade2Name = "Burn";
 		} // Damage 1, Range 5, Fire Rate 20 (Adjust)
@@ -114,8 +114,8 @@ class longRangeTower : public Tower {
 
 		longRangeTower(int x, int y, Direction dir) : Tower(x, y, 1, 10, dir, 10) {
 			towerCost = 200;
-			upgrade1Cost = 250;
-			upgrade2Cost = 1000;
+			upgrade1Cost = 150;
+			upgrade2Cost = 600;
 			upgrade1Name = "Range";
 			upgrade2Name = "Pierce";
 		} // Damage 1, Range 10
@@ -132,10 +132,10 @@ class heavyDamageTower : public Tower {
 	public:
 		bool slow = false;
 
-		heavyDamageTower(int x, int y, Direction dir) : Tower(x, y, 3, 3, dir, 10) {
+		heavyDamageTower(int x, int y, Direction dir) : Tower(x, y, 5, 3, dir, 40) {
 			towerCost = 350;
-			upgrade1Cost = 250;
-			upgrade2Cost = 600;
+			upgrade1Cost = 200;
+			upgrade2Cost = 300;
 			upgrade1Name = "Range";
 			upgrade2Name = "Slow";
 		} // Damage 3, Range 3
@@ -152,10 +152,10 @@ class heavyDamageTower : public Tower {
 class fourWayTower : public Tower {
 	int fireTicks[4] = { 0,0,0,0 }; // cooldown for each direction
 	public:
-		fourWayTower(int x, int y, Direction dir) : Tower(x, y, 1, 4, dir, 10) {
+		fourWayTower(int x, int y, Direction dir) : Tower(x, y, 2, 4, dir, 15) {
 			towerCost = 500;
-			upgrade1Cost = 1250;
-			upgrade2Cost = 1500;
+			upgrade1Cost = 500;
+			upgrade2Cost = 750;
 			upgrade1Name = "Fire Rate";
 			upgrade2Name = "Range";
 		} // Damage 1, Range 4, shoots in all directions

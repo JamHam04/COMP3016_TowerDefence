@@ -4,6 +4,7 @@
 class Projectile {
 private:
 	int projX, projY;
+	int prevProjX, prevProjY;
 	Direction direction;
 	int speed;
 	int damage;
@@ -11,6 +12,7 @@ private:
 	int distance;
 	int moveTick;
 	bool penetrate; // Go through enemies
+	int pierceCount; // Number of enemies pierced
 	bool slow;
 	bool burn;
 
@@ -23,11 +25,15 @@ public:
 
 	int getProjX() const { return projX; }
 	int getProjY() const { return projY; }
+	int getPrevX() const { return prevProjX; }
+	int getPrevY() const { return prevProjY; }
 	int getDamage() const { return damage; }
 
 	// Pierce Upgrade
 	void setPenetrate(bool p) { penetrate = p; }
 	bool canPenetrate() const { return penetrate; }
+	void incrementPierceCount() { pierceCount++; }
+	int getPierceCount() const { return pierceCount; }
 
 	// Slow Upgrade
 	void setSlow(bool s) { slow = s; }

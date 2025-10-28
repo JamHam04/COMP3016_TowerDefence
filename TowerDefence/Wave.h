@@ -17,5 +17,4 @@ public:
 	std::vector<std::unique_ptr<Enemy>> spawnEnemies();
 	bool waveComplete();
 
-	//std::vector<std::unique_ptr<Enemy>>& getEnemies() { return enemies; }
 };

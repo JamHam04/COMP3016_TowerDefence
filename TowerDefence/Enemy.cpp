@@ -1,13 +1,19 @@
 #include "Enemy.h"
 
 Enemy::Enemy(int h, int s)
-	: health(h), pathPosition(0), speed(s), moveTick(0), x(0), y(0),
-	enemySlowed(false), enemyBurned(false), burnDamage(0), burnDuration(0), slowDuration(0), slowTick(0),
+	: health(h), pathPosition(0), speed(s), moveTick(0), x(0), y(0), prevX(0), prevY(0),
+	enemySlowed(false), slowAmount(0), slowDuration(0), slowTick(0),
+	enemyBurned(false), burnDamage(0), burnDuration(0), burnTick(0),
 	enemyDamaged(false), enemyBurnEffect(false)
 {}
 
 void Enemy::move(const int pathX[], const int pathY[], int pathLength)
+
 {
+	// Get previous position
+	prevX = x;
+	prevY = y;
+
 	// Reaches end of path
 	if (pathPosition >= pathLength)
         return;
@@ -36,7 +42,8 @@ void Enemy::move(const int pathX[], const int pathY[], int pathLength)
 			slowDuration--;
 			slowTick = 0;
 			if (slowDuration <= 0) {
-				speed -= slowAmount; 
+				speed -= slowAmount;
+				if (speed < 0) speed = 0; // Prevent speed going under 0
 				enemySlowed = false;// Remove slow effect
 			}
 		}

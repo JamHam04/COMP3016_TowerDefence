@@ -1,23 +1,17 @@
 #include "Projectile.h"
 
-Projectile::Projectile(int x, int y, Direction dir, int s, int d, int r, int dis) {
-	projX = x;
-	projY = y;
-	direction = dir;
-	speed = s;
-	damage = d;
-	moveTick = 0;
-	penetrate = false;
-	slow = false;
-	burn = false;
-	range = r;
-	distance = dis;
-
+Projectile::Projectile(int x, int y, Direction dir, int s, int d, int r, int dis)
+	: projX(x), projY(y), prevProjX(x), prevProjY(y), direction(dir), speed(s), damage(d),
+	range(r), distance(dis), moveTick(0),
+	penetrate(false), pierceCount(0), slow(false), burn(false)
+{
 }
+
 
 void Projectile::move() {
 
-
+	prevProjX = projX;
+	prevProjY = projY;
 
 	if (moveTick != speed) {
 		moveTick++;

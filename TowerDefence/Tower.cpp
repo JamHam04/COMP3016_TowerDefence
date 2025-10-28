@@ -3,14 +3,14 @@
 
 
 Tower::Tower(int x, int y, int d, int r, Direction dir, int rate)
-    : towerPositionX(x),
-      towerPositionY(y),
-      towerRotation(dir),
-      towerDamage(d),
-      towerRange(r),
-      fireRate(rate),
-      fireTick(rate) 
-{}
+    : towerPositionX(x), towerPositionY(y),
+    towerDamage(d), towerRange(r), towerRotation(dir),
+    fireRate(rate), fireTick(rate),
+    towerCost(0), upgrade1Level(0), upgrade2Level(0), totalUpgradeCost(0),
+    towerDelete(false)
+{
+}
+
 
 
 bool basicTower::upgradeDamage() {
@@ -19,7 +19,7 @@ bool basicTower::upgradeDamage() {
     upgrade1Level++;
     towerDamage += 1; // Increase damage
     totalUpgradeCost += upgrade1Cost;
-    upgrade1Cost += 300;
+    upgrade1Cost += 100;
     return true;
 }
 
@@ -40,7 +40,7 @@ bool longRangeTower::upgradeRange() {
     upgrade1Level++;
     towerRange += 2; // Increase range
     totalUpgradeCost += upgrade1Cost;
-    upgrade1Cost += 400;
+    upgrade1Cost += 150;
     return true;
 }
 
@@ -60,7 +60,7 @@ bool heavyDamageTower::upgradeRange() {
 
     towerRange += 1; // Increase range
     totalUpgradeCost += upgrade1Cost;
-    upgrade1Cost += 750;
+    upgrade1Cost += 200;
     return true;
 }
 
@@ -80,7 +80,7 @@ bool fourWayTower::upgradeFireRate() {
     upgrade1Level++;
 	fireRate -= 2; // Increase fire rate
     totalUpgradeCost += upgrade1Cost;
-    upgrade1Cost += 2500;
+    upgrade1Cost += 250;
     return true;
 }
 

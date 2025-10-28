@@ -18,14 +18,17 @@ private:
 	bool waveStart = false; // Wait for input to start wave (waveStart = true during waves)
 	const int width = 25;
 	const int height = 25;
-	int baseHealth = 10;
-	int money = 5000;
 	int spawnTick = 0;
 	int gridSize = 24;
 	int currentWave = 0;
+	int specialWave = 5;
 	bool openUpgradeMenu = false;
 	int selectedTower = 0;
 	bool baseDamaged = false;
+
+	// Game stats
+	int baseHealth = 50;
+	int money = 150;
 	
 
 	// Path coordinates
@@ -36,7 +39,7 @@ private:
 
 	// Input
 	int cursorX = 10, cursorY = 10;
-	Direction cursorDir;
+	Direction cursorDir = UP;
 
 	// Game vectors
 	std::vector<std::unique_ptr<Enemy>> enemies; // Store Enemy pointers
@@ -75,6 +78,7 @@ public:
 	void Logic();
 	void Input();
 	void createPath();
+	void createWaves();
 	void Render();
 	void drawHUD();
 	void drawTowerControls();
@@ -82,5 +86,10 @@ public:
 	bool getGameOver() const { return gameOver; }
 	bool isTileFree(int x, int y);
 	bool isTileHUD(int x, int y);
+	void updateWaves();
+	void updateEnemies();
+	void updateTowers();
+	void updateProjectiles();
+	void isGameOver();
 };
 
