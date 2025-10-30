@@ -1,5 +1,5 @@
 #include "Enemy.h"
-
+// Enemy constructor
 Enemy::Enemy(int h, int s)
 	: health(h), pathPosition(0), speed(s), moveTick(0), x(0), y(0), prevX(0), prevY(0),
 	enemySlowed(false), slowAmount(0), slowDuration(0), slowTick(0),
@@ -7,6 +7,7 @@ Enemy::Enemy(int h, int s)
 	enemyDamaged(false), enemyBurnEffect(false)
 {}
 
+// Move enemy along path
 void Enemy::move(const int pathX[], const int pathY[], int pathLength)
 
 {
@@ -18,6 +19,7 @@ void Enemy::move(const int pathX[], const int pathY[], int pathLength)
 	if (pathPosition >= pathLength)
         return;
     
+	// Apply burn effect
 	if (enemyBurned) {
 		burnTick++;
 		// Burn damage
@@ -36,6 +38,7 @@ void Enemy::move(const int pathX[], const int pathY[], int pathLength)
 		
 	}
 
+	// Apply slow effect
 	if (enemySlowed) {
 		slowTick++;
 		if (slowTick >= 20) { // Slow every 20 ticks
@@ -49,20 +52,21 @@ void Enemy::move(const int pathX[], const int pathY[], int pathLength)
 		}
 	}
 
-	// If at end
+	// Move based on speed
 	if (moveTick != speed) {
 		moveTick++;
 	}
 
-
+	// Move enemy
 	else {
 		x = pathX[pathPosition];
 		y = pathY[pathPosition];
-		pathPosition++; // Move 1
+		pathPosition++;
 		moveTick = 0;
 	}
 }
 
+// Enemy Damaged
 void Enemy::hit(int damage)
 {
     health -= damage;
@@ -70,6 +74,7 @@ void Enemy::hit(int damage)
 	enemyDamaged = true;
 }
 
+// Apply slow effect to enemy
 void Enemy::enemySlow(int amount, int tick)
 {
 	if (!enemySlowed) {
@@ -82,6 +87,7 @@ void Enemy::enemySlow(int amount, int tick)
 
 }
 
+// Apply burn effect to enemy
 void Enemy::enemyBurn(int amount, int tick)
 {
 	// Burn effet 
@@ -90,7 +96,6 @@ void Enemy::enemyBurn(int amount, int tick)
 		burnDamage = amount;
 		burnDuration = tick;
 		burnTick = 0;
-
 	}
 
 }

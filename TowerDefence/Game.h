@@ -10,27 +10,23 @@
 #include <SDL_ttf.h>
 #include <string>
 
+// Game class to manage overall game state
 class Game
 {
 private:
 	// Game 
 	bool gameOver = false;
-	bool waveStart = false; // Wait for input to start wave (waveStart = true during waves)
-	const int width = 25;
-	const int height = 25;
-	int spawnTick = 0;
-	int gridSize = 24;
+	bool waveStart = false; 
 	int currentWave = 0;
 	int specialWave = 5;
 	bool openUpgradeMenu = false;
 	int selectedTower = 0;
 	bool baseDamaged = false;
 
-	// Game stats
+	// Player stats
 	int baseHealth = 50;
 	int money = 150;
 	
-
 	// Path coordinates
 	int pathX[100], pathY[100];
 	int pathLength = 0;
@@ -55,6 +51,11 @@ private:
 	};
 	std::vector < floodArea > floodAreas;
 	
+	// Map settings
+	const int width = 25;
+	const int height = 25;
+	int spawnTick = 0;
+	int gridSize = 24;
 
 	// Render
 	SDL_Window* window;
@@ -67,29 +68,38 @@ public:
 	Game();
 	~Game();
 
-	// Base damged 
+	// Base damaged 
 	bool baseDamageEffect() { return baseDamaged; }
 	void resetDamageEffect() { baseDamaged = false; }
-	bool isbaseDamged() const { return baseDamaged; } 
-
+	bool isBaseDamged() const { return baseDamaged; } 
 
 	// Game functions
 	void Setup();
 	void Logic();
 	void Input();
+
+	// Create path and waves
 	void createPath();
 	void createWaves();
+
+	// Draw functions
 	void Render();
 	void drawHUD();
 	void drawTowerControls();
 	void drawUpgradeMenu();
-	bool getGameOver() const { return gameOver; }
+	
+	// Tile checks
 	bool isTileFree(int x, int y);
 	bool isTileHUD(int x, int y);
+
+	// Game updates
 	void updateWaves();
 	void updateEnemies();
 	void updateTowers();
 	void updateProjectiles();
+
+	// Check game over
+	bool getGameOver() const { return gameOver; }
 	void isGameOver();
 };
 
