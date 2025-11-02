@@ -23,12 +23,37 @@ Enemies come in different types (small, medium, large) with differing health and
 Every 5 rounds, a special wave occurs that activate flood areas within the map, disabling any towers placed in these areas.
 
 # Dependencies Used
+These must be added or reference to build and run the game:
 
-SDL2 – Rendering, window management, and input handling.
+1. SDL2 (2.28.2)
 
-SDL_ttf – Text rendering for HUD and menus.
+Include Directory: Add the include folder from SDL2 to the project’s Additional Include Directories.
+Example: C:\SDL2\include
 
-Font - BBHSansHegarty-Regular
+Library Directory: Add the lib folder from SDL2 to Additional Library Directories.
+Example: C:\SDL2\lib\x64
+
+Linker Input: Add SDL2.lib and SDL2main.lib to Additional Dependencies under Linker → Input.
+
+Runtime DLL: Copy SDL2.dll to the folder containing the compiled .exe.
+
+2. SDL_ttf (2.22.0)
+
+Include Directory: Add the include folder from SDL_ttf to Additional Include Directories.
+
+Library Directory: Add the lib folder from SDL_ttf to Additional Library Directories.
+
+Linker Input: Add SDL2_ttf.lib to Additional Dependencies.
+
+Runtime DLL: Copy SDL2_ttf.dll to the folder containing the compiled .exe.
+
+3. Fonts
+
+Ensure BBHSansHegarty-Regular.ttf is placed in the same folder as the executable
+
+4. Wave Data
+
+Include waveData.txt in the project directory
 
 # Use of AI During Development
 
