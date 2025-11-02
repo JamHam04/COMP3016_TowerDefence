@@ -64,17 +64,17 @@ Wave Management: The Wave class spawns enemies at set intervals until complete.
 Damage Handling: Enemies lose health on hit; if health drops to zero, they are removed and the player gains currency.
 
 # UML Design Diagram
-![UML Design Diagram](images/TowerDefenceDiagram)
+![UML Design Diagram](images/TowerDefenceDiagram.png)
 
 # Sample Screens
 Gameplay:
-![UML Design Diagram](images/Gameplay)
+![UML Design Diagram](images/Gameplay.png)
 
 Tower Upgrades:
-![UML Design Diagram](images/TowerUpgrades)
+![UML Design Diagram](images/TowerUpgrades.png)
 
 Special Waves:
-![UML Design Diagram](images/SpecialWaves)
+![UML Design Diagram](images/SpecialWaves.png)
 
 # Exception Handling and Testing
 
