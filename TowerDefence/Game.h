@@ -20,6 +20,7 @@ private:
 	int currentWave = 0;
 	int specialWave = 5;
 	bool openUpgradeMenu = false;
+	bool openControlMenu = true;
 	int selectedTower = 0;
 	bool baseDamaged = false;
 
@@ -86,6 +87,7 @@ public:
 	void Render();
 	void drawHUD();
 	void drawTowerControls();
+	void drawControlMenu();
 	void drawUpgradeMenu();
 	
 	// Tile checks

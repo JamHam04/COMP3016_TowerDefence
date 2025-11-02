@@ -361,6 +361,55 @@ void Game::drawTowerControls() {
 	}
 }
 
+void Game::drawControlMenu() {
+	// Control menu background
+	int menuW = 350, menuH = 260;
+	int menuX = (width * gridSize - menuW) / 2;
+	int menuY = (height * gridSize - menuH) / 2;
+	SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 220);
+	SDL_Rect menuRect = { menuX, menuY, menuW, menuH };
+	SDL_RenderFillRect(renderer, &menuRect);
+
+	// Title
+	SDL_Color titleColor = { 255, 255, 0, 255 };
+	std::string title = "Game Controls";
+	SDL_Surface* titleSurface = TTF_RenderText_Blended(font, title.c_str(), titleColor);
+	SDL_Texture* titleTexture = SDL_CreateTextureFromSurface(renderer, titleSurface);
+	int tw, th;
+	SDL_QueryTexture(titleTexture, NULL, NULL, &tw, &th);
+	SDL_Rect titleRect = { menuX + (menuW - tw) / 2, menuY + 15, tw, th };
+	SDL_RenderCopy(renderer, titleTexture, NULL, &titleRect);
+	SDL_FreeSurface(titleSurface);
+	SDL_DestroyTexture(titleTexture);
+
+	// Controls list
+	SDL_Color textColor = { 255, 255, 255, 255 };
+	const char* controls[] = {
+		"WASD: Move cursor",
+		"Q/E: Rotate cursor",
+		"1-4: Place tower",
+		"0: Delete tower",
+		"F: Upgrade menu",
+		"Y: Start wave",
+		"F1: Show/hide this menu",
+	};
+	int y = menuY + 50;
+
+	// Draw each control line
+	for (const char* line : controls) {
+		SDL_Surface* textSurface = TTF_RenderText_Blended(fontSmall, line, textColor);
+		SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+		int lw, lh;
+		SDL_QueryTexture(textTexture, NULL, NULL, &lw, &lh);
+		SDL_Rect textRect = { menuX + 30, y, lw, lh };
+		SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+		SDL_FreeSurface(textSurface);
+		SDL_DestroyTexture(textTexture);
+		y += 28; // Line space
+	}
+}
+
 // Draw HUD
 void Game::drawHUD() {
 	int hudX = 5;
@@ -649,10 +698,14 @@ void Game::Render() {
 	if (openUpgradeMenu) {
 		drawUpgradeMenu();
 	}
+	if (openControlMenu) {
+		drawControlMenu();
+	}
 	// Draw game elements
 	drawHUD();
 	resetDamageEffect();
 	drawTowerControls();
+	
 	SDL_RenderPresent(renderer);
 	SDL_Delay(50);
 };
@@ -823,6 +876,18 @@ void Game::Input() {
 						}
 
 					}
+					break;
+
+				case SDL_SCANCODE_F1:
+					if (openControlMenu) {
+						openControlMenu = false; 
+						break;
+					}
+					else {
+						openControlMenu = true;
+						break;
+					}
+					
 			}
 
 			// buy upgrades
@@ -916,6 +981,7 @@ void Game::updateEnemies() {
 			
 			baseDamaged = true; // Take player damage
 			enemies.erase(enemies.begin() + i); // Delete from vector
+			i--;
 			continue;
 
 		}
@@ -930,6 +996,7 @@ void Game::updateEnemies() {
 			}
 			// Delete enemy
 			enemies.erase(enemies.begin() + i); // Delete from vector
+			i--;
 			continue;
 		}
 	}
