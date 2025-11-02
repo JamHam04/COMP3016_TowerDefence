@@ -3,6 +3,9 @@
 A C++ and SDL2-based tower defence game using object-oriented programming and real-time game logic.
 This report provides a concise overview of the game and its development process.
 
+# Video Link
+https://youtu.be/sp-2pJSsx4Y
+
 # Gameplay Description
 
 The player must defend their base from waves of incoming enemies that follow the path.
